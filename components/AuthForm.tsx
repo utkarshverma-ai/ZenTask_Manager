@@ -6,6 +6,16 @@ interface AuthFormProps {
   onAuthSuccess: (user: any) => void;
 }
 
+const getAuthErrorMessage = (error: unknown) => {
+  const message = error instanceof Error ? error.message : 'Unable to complete authentication.';
+
+  if (message.toLowerCase().includes('email rate limit exceeded')) {
+    return 'Email verification is temporarily rate-limited. Please wait before trying again or contact an admin. For demo environments, disable email confirmation in Supabase or configure custom SMTP.';
+  }
+
+  return message;
+};
+
 export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
@@ -25,8 +35,8 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
       } else {
         onAuthSuccess(await supabaseAuth.signUp(email, password, name));
       }
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(getAuthErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -78,6 +88,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
         </button>
       </form>
 
+      {!isLogin && <p className="mt-4 rounded-lg bg-blue-50 p-3 text-xs text-blue-800">
+        A confirmation email may be required before your first sign in.
+      </p>}
 
       <div className="mt-6 text-center text-sm text-slate-600">
         {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}
