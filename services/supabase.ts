@@ -27,7 +27,13 @@ const mapTask = (row: any): Task => ({ ...row, assigned_to: undefined, assignee_
 const loadProfile = async (id: string, fallback?: { email?: string; user_metadata?: Record<string, string> }): Promise<User> => {
   const { data, error } = await client().from('profiles').select('*').eq('id', id).single();
   if (error && error.code !== 'PGRST116') raise(error);
-  return data ? mapUser(data) : { id, email: fallback?.email || '', name: fallback?.user_metadata?.full_name || '', role: UserRole.MEMBER };
+  if (!data) return { id, email: fallback?.email || '', name: fallback?.user_metadata?.full_name || '', role: UserRole.MEMBER };
+  if (data.role === 'member') {
+    const { data: bootstrapped, error: bootstrapError } = await client().rpc('bootstrap_initial_admin');
+    raise(bootstrapError);
+    if (bootstrapped) return { ...mapUser(data), role: UserRole.ADMIN };
+  }
+  return mapUser(data);
 };
 
 export const supabaseAuth = {

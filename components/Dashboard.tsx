@@ -68,6 +68,11 @@ export const Dashboard: React.FC<{ user: User }> = ({ user }) => {
       </section>
 
       {error && <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</div>}
+      {!loading && !projects.length && <div className="rounded-2xl border border-blue-200 bg-blue-50 p-5 text-sm text-blue-900">
+        <h3 className="font-bold">{user.role === UserRole.ADMIN ? 'Create your first project' : 'No project access yet'}</h3>
+        <p className="mt-1">{user.role === UserRole.ADMIN ? 'Start by creating a project. You can then select its team members and add tasks.' : 'Ask an admin to add you to a project. Once assigned, the project and its tasks will appear here automatically.'}</p>
+        {user.role === UserRole.ADMIN && <button className="btn-primary mt-4" onClick={() => setProjectModal({ open: true })}>+ Create first project</button>}
+      </div>}
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-7">
         <Metric label="Total projects" value={projects.length} note="Accessible workspace" />

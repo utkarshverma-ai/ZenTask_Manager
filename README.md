@@ -21,19 +21,16 @@ https://zen-task-manager.vercel.app/
 1. Create a Supabase Cloud project.
 2. Run [`supabase/migrations/202606010001_initial_schema.sql`](supabase/migrations/202606010001_initial_schema.sql) in the Supabase SQL Editor.
 3. Run [`supabase/migrations/202606010002_validate_task_assignee.sql`](supabase/migrations/202606010002_validate_task_assignee.sql) in the Supabase SQL Editor.
-4. Copy `.env.example` to `.env.local` and add the Supabase project URL and anon key.
-5. Start the frontend:
+4. Run [`supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql`](supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql) in the Supabase SQL Editor.
+5. Copy `.env.example` to `.env.local` and add the Supabase project URL and anon key.
+6. Start the frontend:
 
 ```bash
 npm install
 npm run dev
 ```
 
-The first account signs up as a `member`. Promote one trusted account from the Supabase SQL Editor:
-
-```sql
-update public.profiles set role = 'admin' where email = 'admin@example.com';
-```
+The first authenticated account is promoted to `admin` automatically when no admin exists. Later signups remain `member` accounts.
 
 ## Environment Variables
 
@@ -57,8 +54,9 @@ The migrations enable RLS on every table. Database policies enforce the followin
 - Admins create, update, and delete projects and manage project membership.
 - Authorized project members create and update tasks.
 - Task assignees must belong to the related project.
+- Members with assigned tasks cannot be removed from a project until their tasks are reassigned.
 - Only admins delete tasks.
-- New signups always receive the `member` role. Admin promotion requires an existing admin or a trusted SQL/backend operation.
+- New signups receive the `member` role. The first authenticated user is promoted once when no admin exists; later role changes require an admin or trusted backend operation.
 - Database constraints validate statuses, priorities, required dates, and title lengths.
 
 ## Vercel Deployment
