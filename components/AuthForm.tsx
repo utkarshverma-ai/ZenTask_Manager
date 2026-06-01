@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { supabaseMock } from '../services/supabaseMock';
+import { supabaseAuth } from '../services/supabase';
 
 interface AuthFormProps {
   onAuthSuccess: (user: any) => void;
@@ -9,6 +9,7 @@ interface AuthFormProps {
 export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
+  const [name, setName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,13 +21,9 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
 
     try {
       if (isLogin) {
-        const { data, error: err } = await supabaseMock.auth.signIn(email, password);
-        if (err) throw err;
-        onAuthSuccess(data.user);
+        onAuthSuccess(await supabaseAuth.signIn(email, password));
       } else {
-        const { data, error: err } = await supabaseMock.auth.signUp(email, password);
-        if (err) throw err;
-        onAuthSuccess(data.user);
+        onAuthSuccess(await supabaseAuth.signUp(email, password, name));
       }
     } catch (err: any) {
       setError(err.message);
@@ -36,18 +33,22 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-12 p-8 bg-white rounded-xl shadow-sm border border-slate-200">
+    <div className="max-w-md mx-auto mt-10 p-8 bg-white rounded-2xl shadow-sm border border-slate-200">
       <h2 className="text-2xl font-bold text-slate-800 mb-6 text-center">
         {isLogin ? 'Welcome Back' : 'Create Account'}
       </h2>
       
       <form onSubmit={handleSubmit} className="space-y-4">
+        {!isLogin && <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">Full name</label>
+          <input type="text" required className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+        </div>}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">Email</label>
           <input
             type="email"
             required
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            className="input"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -59,7 +60,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           <input
             type="password"
             required
-            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+            className="input"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••"
@@ -76,6 +77,7 @@ export const AuthForm: React.FC<AuthFormProps> = ({ onAuthSuccess }) => {
           {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
         </button>
       </form>
+
 
       <div className="mt-6 text-center text-sm text-slate-600">
         {isLogin ? "Don't have an account?" : "Already have an account?"}{' '}

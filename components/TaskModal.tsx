@@ -1,115 +1,70 @@
-
-import React, { useState, useEffect } from 'react';
-import { Task, TaskStatus } from '../types';
+import React, { useEffect, useState } from 'react';
+import { Project, Task, TaskPriority, TaskStatus, User } from '../types';
 
 interface TaskModalProps {
   task?: Task | null;
+  projects: Project[];
+  users: User[];
+  initialProjectId?: string;
   isOpen: boolean;
   onClose: () => void;
   onSave: (taskData: Partial<Task>) => void;
 }
 
-export const TaskModal: React.FC<TaskModalProps> = ({ task, isOpen, onClose, onSave }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [status, setStatus] = useState<TaskStatus>(TaskStatus.TODO);
-  const [dueDate, setDueDate] = useState('');
+export const TaskModal: React.FC<TaskModalProps> = ({ task, projects, users, initialProjectId, isOpen, onClose, onSave }) => {
+  const [form, setForm] = useState<Partial<Task>>({});
 
   useEffect(() => {
-    if (task) {
-      setTitle(task.title);
-      setDescription(task.description);
-      setStatus(task.status);
-      setDueDate(task.due_date.split('T')[0]);
-    } else {
-      setTitle('');
-      setDescription('');
-      setStatus(TaskStatus.TODO);
-      setDueDate('');
-    }
-  }, [task, isOpen]);
+    setForm(task || {
+      project_id: initialProjectId || projects[0]?.id || '',
+      assignee_id: '',
+      status: TaskStatus.TODO,
+      priority: TaskPriority.MEDIUM,
+      due_date: ''
+    });
+  }, [task, isOpen, initialProjectId, projects]);
 
   if (!isOpen) return null;
+  const selectedProject = projects.find(project => project.id === form.project_id);
+  const availableUsers = users.filter(user => selectedProject?.member_ids.includes(user.id));
+  const update = (field: keyof Task, value: string) => setForm(current => ({ ...current, [field]: value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({ title, description, status, due_date: dueDate });
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSave({ ...form, assignee_id: form.assignee_id || availableUsers[0]?.id });
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-slate-200">
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-slate-800">
-            {task ? 'Edit Task' : 'New Task'}
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-2xl">&times;</button>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/55 p-4 backdrop-blur-sm">
+      <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl border border-slate-200 bg-white shadow-2xl">
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+          <h3 className="text-lg font-bold text-slate-900">{task ? 'Edit task' : 'Create task'}</h3>
+          <button onClick={onClose} className="text-2xl text-slate-400 hover:text-slate-700">&times;</button>
         </div>
-        
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Title</label>
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-            />
+        <form onSubmit={handleSubmit} className="space-y-4 p-6">
+          <Field label="Task title"><input required value={form.title || ''} onChange={event => update('title', event.target.value)} className="input" placeholder="What needs to be done?" /></Field>
+          <Field label="Description"><textarea value={form.description || ''} onChange={event => update('description', event.target.value)} className="input min-h-24" placeholder="Add useful context for the assignee" /></Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Project"><select required value={form.project_id || ''} onChange={event => { update('project_id', event.target.value); update('assignee_id', ''); }} className="input">{projects.map(project => <option key={project.id} value={project.id}>{project.name}</option>)}</select></Field>
+            <Field label="Assignee"><select required value={form.assignee_id || ''} onChange={event => update('assignee_id', event.target.value)} className="input"><option value="">Select member</option>{availableUsers.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}</select></Field>
+            <Field label="Status"><select value={form.status} onChange={event => update('status', event.target.value)} className="input">{Object.values(TaskStatus).map(status => <option key={status}>{status}</option>)}</select></Field>
+            <Field label="Priority"><select value={form.priority} onChange={event => update('priority', event.target.value)} className="input">{Object.values(TaskPriority).map(priority => <option key={priority}>{priority}</option>)}</select></Field>
           </div>
-
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-            <textarea
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500 min-h-[100px]"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-              <select
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                value={status}
-                onChange={(e) => setStatus(e.target.value as TaskStatus)}
-              >
-                <option value={TaskStatus.TODO}>Todo</option>
-                <option value={TaskStatus.IN_PROGRESS}>In Progress</option>
-                <option value={TaskStatus.DONE}>Done</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Due Date</label>
-              <input
-                type="date"
-                required
-                className="w-full px-3 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-blue-500"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="pt-4 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors shadow-sm"
-            >
-              Save Task
-            </button>
+          <Field label="Due date"><input required type="date" value={form.due_date || ''} onChange={event => update('due_date', event.target.value)} className="input" /></Field>
+          <div className="flex justify-end gap-3 pt-2">
+            <button type="button" onClick={onClose} className="btn-secondary">Cancel</button>
+            <button type="submit" className="btn-primary">Save task</button>
           </div>
         </form>
       </div>
     </div>
   );
 };
+
+const Field: React.FC<{ label: string; children: React.ReactNode }> = ({ label, children }) => (
+  <label className="block text-sm font-medium text-slate-700">
+    <span className="mb-1.5 block">{label}</span>
+    {children}
+  </label>
+);

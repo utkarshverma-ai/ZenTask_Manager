@@ -14,6 +14,30 @@
             font-family: 'Inter', sans-serif;
             background-color: #f8fafc;
         }
+        .input {
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            padding: 0.625rem 0.75rem;
+            background: white;
+            outline: none;
+            transition: 150ms ease;
+        }
+        .input:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px #dbeafe; }
+        .field { display: block; color: #334155; font-size: 0.875rem; font-weight: 500; }
+        .field > .input { display: block; margin-top: 0.375rem; }
+        .btn-primary, .btn-secondary, .btn-danger, .btn-icon {
+            border-radius: 0.5rem; padding: 0.625rem 0.875rem; font-size: 0.875rem; font-weight: 600; transition: 150ms ease;
+        }
+        .btn-primary { background: #2563eb; color: white; }
+        .btn-primary:hover { background: #1d4ed8; }
+        .btn-secondary { border: 1px solid #cbd5e1; background: white; color: #475569; }
+        .btn-secondary:hover { background: #f8fafc; border-color: #94a3b8; }
+        .btn-danger { background: #fef2f2; color: #dc2626; }
+        .btn-danger:hover { background: #fee2e2; }
+        .btn-icon { padding: 0.375rem 0.5rem; color: #475569; }
+        .btn-icon:hover { background: #e2e8f0; }
+        .status { border-radius: 9999px; padding: 0.2rem 0.55rem; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
     </style>
 <script type="importmap">
 {
@@ -25,7 +49,6 @@
   }
 }
 </script>
-<link rel="stylesheet" href="/index.css">
 </head>
 <body>
     <div id="root"></div>

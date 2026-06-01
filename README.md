@@ -1,54 +1,82 @@
-## 🌐 Live Demo
+# ZenTask Manager
 
-(https://zen-task-manager.vercel.app/)
+A centralized Vite + React + TypeScript project delivery platform backed by Supabase.
 
-## Tech Stack
+## Live Demo
 
-- **Next.js (App Router)** – Frontend framework for building the web application  
-- **TypeScript** – Type safety and better code maintainability  
-- **Tailwind CSS** – Simple and responsive UI styling  
-- **Supabase**
-  - **Authentication** – Email & password based login/signup
-  - **PostgreSQL Database** – Storing user-specific tasks
+https://zen-task-manager.vercel.app/
 
----
+## Features
 
-## Authentication Flow
+- Supabase email/password authentication with persisted sessions
+- `Admin` and `Member` authorization enforced by Postgres Row Level Security
+- Project CRUD, project teams, start dates, due dates, and progress tracking
+- Task CRUD, assignments, priorities, due dates, status tracking, search, and filtering
+- Dashboard metrics, overdue detection, team directory, and recent activity
+- Supabase Realtime refresh for projects, project assignments, and tasks
+- Responsive layouts for desktop and mobile usage
 
-1. Users can **sign up or log in** using email and password via Supabase Auth.  
-2. After successful authentication, Supabase creates a **secure user session**.  
-3. Protected routes ensure that only **authenticated users** can access the dashboard.  
-4. On page refresh, the app **checks the existing session** to keep the user logged in.
+## Local Setup
 
----
+1. Create a Supabase Cloud project.
+2. Run [`supabase/migrations/202606010001_initial_schema.sql`](supabase/migrations/202606010001_initial_schema.sql) in the Supabase SQL Editor.
+3. Run [`supabase/migrations/202606010002_validate_task_assignee.sql`](supabase/migrations/202606010002_validate_task_assignee.sql) in the Supabase SQL Editor.
+4. Copy `.env.example` to `.env.local` and add the Supabase project URL and anon key.
+5. Start the frontend:
 
-## Database Structure
+```bash
+npm install
+npm run dev
+```
 
-### `tasks` table
+The first account signs up as a `member`. Promote one trusted account from the Supabase SQL Editor:
 
-| Column | Type | Description |
-|--------|------|-------------|
-| id | uuid (Primary Key) | Unique task identifier |
-| user_id | uuid (Foreign Key → auth.users) | Links task to a specific user |
-| title | text | Task title |
-| description | text | Task details |
-| status | text | `todo`, `in_progress`, `done` |
-| due_date | timestamp | Task deadline |
-| created_at | timestamp | Task creation time |
+```sql
+update public.profiles set role = 'admin' where email = 'admin@example.com';
+```
 
----
+## Environment Variables
 
-## How Tasks Are Linked to Users
+This repository is a Vite frontend, so browser-visible variables must use the `VITE_` prefix:
 
-- Each task stores the **`user_id`** of the authenticated user.  
-- When fetching tasks, queries are **filtered by the current user’s ID**.  
-- This ensures users can **only view, update, or delete their own tasks**, maintaining proper data isolation and security.
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
 
----
+`SUPABASE_SERVICE_ROLE_KEY` is reserved for a trusted backend or Vercel serverless function. Never expose it through a `VITE_` variable or commit it to Git.
 
-## Assumptions Made
+If this frontend is later migrated to Next.js, the public equivalents should be renamed to `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-- Each user manages **only their personal tasks**.  
-- Task status values are limited to **Todo, In Progress, and Done**.  
-- Filtering and sorting are handled **on the client side for simplicity**.  
-- Basic responsive UI is sufficient since the focus is on **functionality and correctness**, not advanced design.
+## Security Model
+
+The migrations enable RLS on every table. Database policies enforce the following:
+
+- Authenticated users can read team profiles.
+- Members can only read projects, memberships, tasks, and activity they are authorized to access.
+- Admins create, update, and delete projects and manage project membership.
+- Authorized project members create and update tasks.
+- Task assignees must belong to the related project.
+- Only admins delete tasks.
+- New signups always receive the `member` role. Admin promotion requires an existing admin or a trusted SQL/backend operation.
+- Database constraints validate statuses, priorities, required dates, and title lengths.
+
+## Vercel Deployment
+
+1. Import `https://github.com/utkarshverma-ai/ZenTask_Manager` into Vercel or run `vercel`.
+2. Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project.
+3. Deploy with `vercel --prod`.
+4. Add the deployed Vercel URL to the Supabase Authentication URL Configuration.
+
+## Known Limitations
+
+- Secure invitation emails and admin-created Auth accounts require a trusted serverless function using `SUPABASE_SERVICE_ROLE_KEY`. The current UI promotes or demotes users who have already signed up.
+- The schema supports activity history, but does not yet provide audit export or retention controls.
+- Automated browser tests and RLS integration tests still need a configured Supabase test project.
+
+## Next Iteration
+
+1. Add a Vercel serverless invitation endpoint with service-role access.
+2. Add password reset, email verification messaging, and invitation acceptance.
+3. Add Playwright workflow coverage and SQL-based RLS regression tests.
+4. Add pagination, notifications, file attachments, and audit export.
