@@ -15,14 +15,14 @@ const client = () => {
 };
 const raise = (error: { message: string } | null) => { if (error) throw new Error(error.message); };
 const projectStatusToDb = (status?: ProjectStatus) => status?.toLowerCase();
-const taskStatusToDb = (status?: TaskStatus) => status === TaskStatus.TODO ? 'todo' : status === TaskStatus.IN_PROGRESS ? 'in_progress' : status === TaskStatus.DONE ? 'completed' : undefined;
+const taskStatusToDb = (status?: TaskStatus) => status === TaskStatus.TODO ? 'todo' : status === TaskStatus.IN_PROGRESS ? 'in_progress' : status === TaskStatus.READY_FOR_REVIEW ? 'ready_for_review' : status === TaskStatus.DONE ? 'completed' : undefined;
 const priorityToDb = (priority?: TaskPriority) => priority?.toLowerCase();
 const projectStatusFromDb = (status: string) => status === 'active' ? ProjectStatus.ACTIVE : status === 'completed' ? ProjectStatus.COMPLETED : ProjectStatus.PLANNING;
-const taskStatusFromDb = (status: string) => status === 'in_progress' ? TaskStatus.IN_PROGRESS : status === 'completed' ? TaskStatus.DONE : TaskStatus.TODO;
+const taskStatusFromDb = (status: string) => status === 'in_progress' ? TaskStatus.IN_PROGRESS : status === 'ready_for_review' ? TaskStatus.READY_FOR_REVIEW : status === 'completed' ? TaskStatus.DONE : TaskStatus.TODO;
 const priorityFromDb = (priority: string) => priority === 'high' ? TaskPriority.HIGH : priority === 'low' ? TaskPriority.LOW : TaskPriority.MEDIUM;
 const mapUser = (row: any): User => ({ id: row.id, email: row.email, name: row.full_name, role: row.role === 'admin' ? UserRole.ADMIN : UserRole.MEMBER });
 const mapProject = (row: any): Project => ({ ...row, owner_id: row.created_by, status: projectStatusFromDb(row.status), member_ids: (row.project_members || []).map((member: any) => member.user_id) });
-const mapTask = (row: any): Task => ({ ...row, assigned_to: undefined, assignee_id: row.assigned_to || '', status: taskStatusFromDb(row.status), priority: priorityFromDb(row.priority) });
+const mapTask = (row: any): Task => ({ ...row, assigned_to: undefined, assignee_id: row.assigned_to || '', status: taskStatusFromDb(row.status), priority: priorityFromDb(row.priority), task_work_log: row.task_work_log || '' });
 
 const loadProfile = async (id: string, fallback?: { email?: string; user_metadata?: Record<string, string> }): Promise<User> => {
   const { data, error } = await client().from('profiles').select('*').eq('id', id).single();
@@ -107,8 +107,12 @@ export const projectService = {
     return (data || []).map(mapTask);
   },
   saveTask: async (task: Partial<Task>, currentUser: User) => {
-    const payload = { project_id: task.project_id, title: task.title, description: task.description, assigned_to: task.assignee_id || null, status: taskStatusToDb(task.status), priority: priorityToDb(task.priority), due_date: task.due_date };
+    const payload = { project_id: task.project_id, title: task.title, description: task.description, assigned_to: task.assignee_id || null, status: taskStatusToDb(task.status), priority: priorityToDb(task.priority), due_date: task.due_date, task_work_log: task.task_work_log || '' };
     raise(task.id ? (await client().from('tasks').update(payload).eq('id', task.id)).error : (await client().from('tasks').insert({ ...payload, created_by: currentUser.id })).error);
+  },
+  updateTaskStatus: async (taskId: string, status: TaskStatus, taskWorkLog: string) => {
+    const payload = { status: taskStatusToDb(status), task_work_log: taskWorkLog };
+    raise((await client().from('tasks').update(payload).eq('id', taskId)).error);
   },
   deleteTask: async (id: string) => raise((await client().from('tasks').delete().eq('id', id)).error),
   getActivityLogs: async () => {

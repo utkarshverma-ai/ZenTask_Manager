@@ -1,6 +1,7 @@
 export enum TaskStatus {
   TODO = 'To Do',
   IN_PROGRESS = 'In Progress',
+  READY_FOR_REVIEW = 'Ready For Review',
   DONE = 'Completed'
 }
 
@@ -61,4 +62,5 @@ export interface Task {
   priority: TaskPriority;
   due_date: string;
   created_at: string;
+  task_work_log: string;
 }

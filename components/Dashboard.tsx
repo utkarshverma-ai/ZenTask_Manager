@@ -52,6 +52,7 @@ export const Dashboard: React.FC<{ user: User }> = ({ user }) => {
 
   const execute = async (operation: () => Promise<unknown>) => { try { await operation(); await refresh(); } catch (issue) { setError(issue instanceof Error ? issue.message : 'Operation failed'); } };
   const saveTask = (task: Partial<Task>) => execute(() => projectService.saveTask(task, user));
+  const updateTaskStatus = (taskId: string, status: TaskStatus, workLog: string) => execute(() => projectService.updateTaskStatus(taskId, status, workLog));
   const saveProject = (project: Partial<Project>) => execute(() => projectService.saveProject(project, user));
   const deleteTask = (id: string) => { if (confirm('Delete this task?')) execute(() => projectService.deleteTask(id)); };
   const deleteProject = (id: string) => { if (confirm('Delete this project and all of its tasks?')) { execute(() => projectService.deleteProject(id)); setSelectedProjectId('all'); } };
@@ -63,7 +64,7 @@ export const Dashboard: React.FC<{ user: User }> = ({ user }) => {
         <div className="flex flex-wrap gap-2">
           {user.role === UserRole.ADMIN && <button className="btn-secondary" onClick={() => setTeamModalOpen(true)}>Manage access</button>}
           {user.role === UserRole.ADMIN && <button className="btn-secondary" onClick={() => setProjectModal({ open: true })}>+ New project</button>}
-          <button disabled={!projects.length} className="btn-primary disabled:opacity-50" onClick={() => setTaskModal({ open: true })}>+ New task</button>
+          {user.role === UserRole.ADMIN && <button disabled={!projects.length} className="btn-primary disabled:opacity-50" onClick={() => setTaskModal({ open: true })}>+ New task</button>}
         </div>
       </section>
 
@@ -114,19 +115,19 @@ export const Dashboard: React.FC<{ user: User }> = ({ user }) => {
           </div>
         </div>
         <div className="divide-y divide-slate-100">
-          {loading ? <div className="p-12 text-center text-sm text-slate-400">Loading workspace...</div> : visibleTasks.length ? visibleTasks.map(task => <article key={task.id} className="group p-4 transition hover:bg-slate-50 sm:p-5">
+          {loading ? <div className="p-12 text-center text-sm text-slate-400">Loading workspace...</div> : visibleTasks.length ? visibleTasks.map(task => { const isAssignee = task.assignee_id === user.id; const canEdit = user.role === UserRole.ADMIN || isAssignee; return <article key={task.id} className="group p-4 transition hover:bg-slate-50 sm:p-5">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
-              <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className={`status ${statusStyle(task.status)}`}>{task.status}</span><span className="text-xs font-semibold text-slate-400">{task.priority} priority</span></div><h4 className="mt-2 font-semibold text-slate-900">{task.title}</h4><p className="mt-1 text-sm text-slate-500">{task.description}</p></div>
-              <div className="flex shrink-0 gap-1"><button onClick={() => setTaskModal({ open: true, task })} className="btn-icon">Edit</button>{user.role === UserRole.ADMIN && <button onClick={() => deleteTask(task.id)} className="btn-icon text-red-600">Delete</button>}</div>
+              <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><span className={`status ${statusStyle(task.status)}`}>{task.status}</span><span className="text-xs font-semibold text-slate-400">{task.priority} priority</span></div><h4 className="mt-2 font-semibold text-slate-900">{task.title}</h4><p className="mt-1 text-sm text-slate-500">{task.description}</p>{task.task_work_log && <p className="mt-2 rounded-lg bg-slate-50 border border-slate-200 p-2 text-xs text-slate-600"><span className="font-semibold text-slate-700">Work Summary:</span> {task.task_work_log.length > 120 ? task.task_work_log.slice(0, 120) + '…' : task.task_work_log}</p>}</div>
+              <div className="flex shrink-0 gap-1">{canEdit && <button onClick={() => setTaskModal({ open: true, task })} className="btn-icon">{user.role === UserRole.ADMIN ? 'Edit' : 'Update Status'}</button>}{user.role === UserRole.ADMIN && <button onClick={() => deleteTask(task.id)} className="btn-icon text-red-600">Delete</button>}</div>
             </div>
             <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500"><span>Project: <b className="text-slate-700">{taskProject(task)?.name}</b></span><span>Owner: <b className="text-slate-700">{taskAssignee(task)?.name}</b></span><span>Due: <b className={new Date(`${task.due_date}T23:59:59`) < new Date() && task.status !== TaskStatus.DONE ? 'text-red-600' : 'text-slate-700'}>{formatDate(task.due_date)}</b></span></div>
-          </article>) : <div className="p-12 text-center text-sm text-slate-400">No tasks match this view.</div>}
+          </article>; }) : <div className="p-12 text-center text-sm text-slate-400">No tasks match this view.</div>}
         </div>
       </section>
 
       <section className="grid gap-6 lg:grid-cols-[1fr_22rem]"><div><h3 className="text-lg font-bold text-slate-900">Team directory</h3><div className="mt-3 grid gap-3 sm:grid-cols-2">{users.map(member => <div key={member.id} className="rounded-xl border border-slate-200 bg-white p-4"><div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-700">{initials(member.name)}</div><p className="mt-3 font-semibold text-slate-800">{member.name}</p><p className="truncate text-xs text-slate-500">{member.email}</p><span className="mt-3 inline-block rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-500">{member.role}</span></div>)}</div></div><div><h3 className="text-lg font-bold text-slate-900">Recent activity</h3><div className="mt-3 divide-y divide-slate-100 rounded-xl border border-slate-200 bg-white">{activity.length ? activity.map(item => <div key={item.id} className="p-3 text-xs text-slate-600"><b className="capitalize text-slate-800">{item.entity_type.replace('_', ' ')}</b> {item.action}<p className="mt-1 text-[11px] text-slate-400">{new Date(item.timestamp).toLocaleString()}</p></div>) : <p className="p-4 text-xs text-slate-400">No activity yet.</p>}</div></div></section>
 
-      <TaskModal isOpen={taskModal.open} task={taskModal.task} projects={projects} users={users} initialProjectId={selectedProjectId !== 'all' ? selectedProjectId : undefined} onClose={() => setTaskModal({ open: false })} onSave={saveTask} />
+      <TaskModal isOpen={taskModal.open} task={taskModal.task} projects={projects} users={users} currentUser={user} initialProjectId={selectedProjectId !== 'all' ? selectedProjectId : undefined} onClose={() => setTaskModal({ open: false })} onSave={saveTask} onUpdateStatus={updateTaskStatus} />
       <ProjectModal isOpen={projectModal.open} project={projectModal.project} users={users} onClose={() => setProjectModal({ open: false })} onSave={saveProject} />
       <TeamModal isOpen={teamModalOpen} onClose={() => setTeamModalOpen(false)} onSave={member => execute(() => projectService.updateMemberRole(member.email, member.role))} />
     </div>
@@ -136,4 +137,4 @@ export const Dashboard: React.FC<{ user: User }> = ({ user }) => {
 const Metric = ({ label, value, note, alert = false }: { label: string; value: string | number; note: string; alert?: boolean }) => <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"><p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{label}</p><p className={`mt-2 text-2xl font-bold ${alert ? 'text-red-600' : 'text-slate-900'}`}>{value}</p><p className="mt-1 text-xs text-slate-500">{note}</p></div>;
 const formatDate = (date: string) => new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 const initials = (name: string) => name.split(' ').map(part => part[0]).join('').slice(0, 2);
-const statusStyle = (status: TaskStatus) => status === TaskStatus.DONE ? 'bg-emerald-50 text-emerald-700' : status === TaskStatus.IN_PROGRESS ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600';
+const statusStyle = (status: TaskStatus) => status === TaskStatus.DONE ? 'bg-emerald-50 text-emerald-700' : status === TaskStatus.READY_FOR_REVIEW ? 'bg-blue-50 text-blue-700' : status === TaskStatus.IN_PROGRESS ? 'bg-amber-50 text-amber-700' : 'bg-slate-100 text-slate-600';
