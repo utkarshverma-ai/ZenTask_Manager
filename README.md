@@ -111,7 +111,7 @@ Submitting for review requires a non-empty work summary. Admins can review a sub
 4. Deploy with the default build command, `npm run build`.
 5. Add the deployed URL to Supabase Auth URL Configuration.
 
-[`frontend/vercel.json`](frontend/vercel.json) provides the SPA rewrite so BrowserRouter routes work after a direct refresh. The root [`vercel.json`](vercel.json) supports deployments that retain the repository root as Vercel's project root.
+Use `frontend` as the Vercel Root Directory. [`frontend/vercel.json`](frontend/vercel.json) provides the SPA rewrite so BrowserRouter routes work after a direct refresh.
 
 ## Security and environment variables
 
