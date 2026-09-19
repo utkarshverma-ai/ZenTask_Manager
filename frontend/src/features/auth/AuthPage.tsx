@@ -4,6 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { useToast } from '../../components/ui/ToastProvider';
+import { AuthFooter } from './components/AuthFooter';
 export function AuthPage() {
   const { user, setUser, error: sessionError } = useAuth();
   const { showToast } = useToast();
@@ -63,91 +64,94 @@ export function AuthPage() {
         </ul>
       </section>
       <section className="auth-main">
-        <form className="auth-card" onSubmit={submit}>
-          <p className="eyebrow">
-            {resetRequest ? 'Account recovery' : login ? 'Welcome back' : 'Create your account'}
-          </p>
-          <h2>{resetRequest ? 'Reset your password' : login ? 'Sign in to ZenTask' : 'Start with your workspace'}</h2>
-          <p className="muted">
-            {resetRequest
-              ? 'Enter your email and we’ll send a secure reset link.'
-              : login
-                ? 'Use your account credentials to continue.'
-                : 'Your administrator can add you to projects after you sign up.'}
-          </p>
-          {!login && !resetRequest && (
+        <div className="auth-form-stack">
+          <form className="auth-card" onSubmit={submit}>
+            <p className="eyebrow">
+              {resetRequest ? 'Account recovery' : login ? 'Welcome back' : 'Create your account'}
+            </p>
+            <h2>{resetRequest ? 'Reset your password' : login ? 'Sign in to ZenTask' : 'Start with your workspace'}</h2>
+            <p className="muted">
+              {resetRequest
+                ? 'Enter your email and we’ll send a secure reset link.'
+                : login
+                  ? 'Use your account credentials to continue.'
+                  : 'Your administrator can add you to projects after you sign up.'}
+            </p>
+            {!login && !resetRequest && (
+              <label>
+                Full name
+                <input
+                  required
+                  autoComplete="name"
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="Your name"
+                />
+              </label>
+            )}
             <label>
-              Full name
+              Email
               <input
                 required
-                autoComplete="name"
-                value={name}
-                onChange={(event) => setName(event.target.value)}
-                placeholder="Your name"
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@company.com"
               />
             </label>
-          )}
-          <label>
-            Email
-            <input
-              required
-              type="email"
-              autoComplete="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@company.com"
-            />
-          </label>
-          {!resetRequest && (
-            <label>
-              Password
-              <input
-                required
-                type="password"
-                minLength={6}
-                autoComplete={login ? 'current-password' : 'new-password'}
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                placeholder="At least 6 characters"
-              />
-            </label>
-          )}
-          {(error || sessionError) && (
-            <div className="field-error" role="alert">
-              {error || sessionError}
-            </div>
-          )}
-          <button className="button primary wide" disabled={loading}>
-            {loading ? 'Working…' : resetRequest ? 'Send reset link' : login ? 'Sign in' : 'Create account'}
-            <ArrowRight aria-hidden="true" />
-          </button>
-          {!login && !resetRequest && <p className="notice">You may need to confirm your email before signing in.</p>}
-          {login && !resetRequest && (
-            <button
-              className="text-button auth-link"
-              type="button"
-              onClick={() => {
-                setResetRequest(true);
-                setError('');
-              }}
-            >
-              Forgot password?
+            {!resetRequest && (
+              <label>
+                Password
+                <input
+                  required
+                  type="password"
+                  minLength={6}
+                  autoComplete={login ? 'current-password' : 'new-password'}
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                  placeholder="At least 6 characters"
+                />
+              </label>
+            )}
+            {(error || sessionError) && (
+              <div className="field-error" role="alert">
+                {error || sessionError}
+              </div>
+            )}
+            <button className="button primary wide" disabled={loading}>
+              {loading ? 'Working…' : resetRequest ? 'Send reset link' : login ? 'Sign in' : 'Create account'}
+              <ArrowRight aria-hidden="true" />
             </button>
-          )}
-          <p className="switch">
-            {resetRequest ? 'Remembered your password?' : login ? 'New to ZenTask?' : 'Already have an account?'}{' '}
-            <button
-              type="button"
-              onClick={() => {
-                if (resetRequest) setResetRequest(false);
-                else setLogin(!login);
-                setError('');
-              }}
-            >
-              {resetRequest ? 'Sign in' : login ? 'Create an account' : 'Sign in'}
-            </button>
-          </p>
-        </form>
+            {!login && !resetRequest && <p className="notice">You may need to confirm your email before signing in.</p>}
+            {login && !resetRequest && (
+              <button
+                className="text-button auth-link"
+                type="button"
+                onClick={() => {
+                  setResetRequest(true);
+                  setError('');
+                }}
+              >
+                Forgot password?
+              </button>
+            )}
+            <p className="switch">
+              {resetRequest ? 'Remembered your password?' : login ? 'New to ZenTask?' : 'Already have an account?'}{' '}
+              <button
+                type="button"
+                onClick={() => {
+                  if (resetRequest) setResetRequest(false);
+                  else setLogin(!login);
+                  setError('');
+                }}
+              >
+                {resetRequest ? 'Sign in' : login ? 'Create an account' : 'Sign in'}
+              </button>
+            </p>
+          </form>
+          <AuthFooter />
+        </div>
       </section>
     </div>
   );
