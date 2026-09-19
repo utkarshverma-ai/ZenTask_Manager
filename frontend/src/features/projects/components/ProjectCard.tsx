@@ -19,7 +19,7 @@ export function ProjectCard({
   return (
     <article className="project-card">
       <div className="project-card-head">
-        <span className="project-status">{project.status}</span>
+        <span className={`project-status ${project.status.toLowerCase()}`}>{project.status}</span>
         {onEdit && (
           <button className="text-button" onClick={onEdit}>
             Edit
