@@ -8,6 +8,7 @@ interface TaskListProps {
   currentUser?: User;
   onEdit?: (task: Task) => void;
   onDelete?: (task: Task) => void;
+  onView?: (task: Task) => void;
 }
 
 export function TaskList(props: TaskListProps) {
@@ -22,6 +23,7 @@ export function TaskList(props: TaskListProps) {
           currentUser={props.currentUser}
           onEdit={props.onEdit}
           onDelete={props.onDelete}
+          onView={props.onView}
         />
       ))}
     </div>

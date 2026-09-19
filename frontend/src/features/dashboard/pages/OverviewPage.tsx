@@ -1,5 +1,6 @@
 import { CalendarDays, CheckCircle2, ClipboardList, FolderKanban } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { useWorkspace } from '../../../app/providers/WorkspaceProvider';
 import { PageHeader } from '../../../components/ui/PageHeader';
@@ -10,10 +11,20 @@ import { MetricCard } from '../components/MetricCard';
 import { ProjectProgress } from '../components/ProjectProgress';
 import { RecentActivity } from '../components/RecentActivity';
 import { TaskList } from '../../tasks/components/TaskList';
+import { TaskDetails } from '../../tasks/components/TaskDetails';
+import { TaskDialog } from '../../tasks/components/TaskDialog';
+import { tasksService } from '../../../services/tasks.service';
+import { useMutation } from '../../../hooks/useMutation';
+import { useToast } from '../../../components/ui/ToastProvider';
+import { Task, TaskDraft } from '../../../types';
 
 export function OverviewPage() {
   const { user } = useAuth();
   const { projects, tasks, users, activity, loading, error, refresh } = useWorkspace();
+  const [details, setDetails] = useState<Task | null>(null);
+  const [editing, setEditing] = useState<Task | null>(null);
+  const mutation = useMutation();
+  const { showToast } = useToast();
   if (loading) return <LoadingState />;
   if (error) return <ErrorAlert message={error} onRetry={() => void refresh()} />;
 
@@ -25,6 +36,7 @@ export function OverviewPage() {
       new Date(`${task.dueDate}T23:59:59`).getTime() - Date.now() < 7 * 86400000,
   ).length;
   const overdue = scopedTasks.filter(isOverdue).length;
+  const waitingForReview = tasks.filter((task) => task.status === TaskStatus.READY_FOR_REVIEW).length;
   const attention = scopedTasks
     .filter((task) => isOverdue(task) || task.status === TaskStatus.READY_FOR_REVIEW)
     .slice(0, 6);
@@ -41,7 +53,14 @@ export function OverviewPage() {
       note: `${scopedTasks.filter((task) => task.status === TaskStatus.DONE).length} completed`,
       icon: ClipboardList,
     },
-    { label: 'Due soon', value: dueSoon, note: 'Within the next 7 days', icon: CalendarDays },
+    user?.role === UserRole.ADMIN
+      ? {
+          label: 'Waiting for review',
+          value: waitingForReview,
+          note: waitingForReview ? 'Submitted tasks need a decision' : 'Review queue is clear',
+          icon: CheckCircle2,
+        }
+      : { label: 'Due soon', value: dueSoon, note: 'Within the next 7 days', icon: CalendarDays },
     {
       label: 'Overdue',
       value: overdue,
@@ -63,9 +82,15 @@ export function OverviewPage() {
         }
       />
       <section className="metric-grid">
-        {metrics.map((metric) => (
-          <MetricCard key={metric.label} {...metric} />
-        ))}
+        {metrics.map((metric) =>
+          metric.label === 'Waiting for review' ? (
+            <Link key={metric.label} to="/tasks?status=Ready%20For%20Review">
+              <MetricCard {...metric} />
+            </Link>
+          ) : (
+            <MetricCard key={metric.label} {...metric} />
+          ),
+        )}
       </section>
       <section className="content-grid">
         {projects.length ? (
@@ -85,14 +110,51 @@ export function OverviewPage() {
             <h2>Tasks requiring attention</h2>
             <p>Overdue work and submissions waiting for review.</p>
           </div>
-          <Link to="/tasks">Open task list</Link>
+          <Link to={user?.role === UserRole.ADMIN ? '/tasks?status=Ready%20For%20Review' : '/tasks'}>
+            Open task list
+          </Link>
         </div>
         {attention.length ? (
-          <TaskList tasks={attention} projects={projects} users={users} />
+          <TaskList
+            tasks={attention}
+            projects={projects}
+            users={users}
+            currentUser={user ?? undefined}
+            onView={setDetails}
+          />
         ) : (
           <EmptyState title="Nothing needs attention" children="You're caught up for now." />
         )}
       </section>
+      {details && (
+        <TaskDetails
+          task={details}
+          projects={projects}
+          users={users}
+          currentUser={user!}
+          onClose={() => setDetails(null)}
+          onEdit={() => {
+            setDetails(null);
+            setEditing(details);
+          }}
+        />
+      )}
+      {editing && (
+        <TaskDialog
+          task={editing}
+          projects={projects}
+          users={users}
+          currentUser={user!}
+          onClose={() => setEditing(null)}
+          onSave={(draft: TaskDraft) =>
+            mutation.run(async () => {
+              await tasksService.save(draft, user!);
+              await refresh();
+              showToast(draft.status === TaskStatus.DONE ? 'Task completed' : 'Task updated');
+            })
+          }
+        />
+      )}
     </div>
   );
 }

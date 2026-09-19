@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { useWorkspace } from '../../../app/providers/WorkspaceProvider';
 import { PageHeader } from '../../../components/ui/PageHeader';
+import { useToast } from '../../../components/ui/ToastProvider';
 import { EmptyState, ErrorAlert, LoadingState } from '../../../components/ui/State';
 import { useMutation } from '../../../hooks/useMutation';
 import { projectsService } from '../../../services/projects.service';
@@ -15,6 +16,7 @@ export function ProjectsPage() {
   const { projects, tasks, users, loading, error, refresh } = useWorkspace();
   const [editing, setEditing] = useState<Project | null | undefined>(undefined);
   const mutation = useMutation();
+  const { showToast } = useToast();
   if (loading) return <LoadingState />;
   return (
     <div className="page">
@@ -70,6 +72,7 @@ export function ProjectsPage() {
             mutation.run(async () => {
               await projectsService.save(draft, user!);
               await refresh();
+              showToast(editing ? 'Project updated' : 'Project created');
             })
           }
         />

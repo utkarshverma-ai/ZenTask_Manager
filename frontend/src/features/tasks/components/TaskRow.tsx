@@ -11,9 +11,10 @@ interface TaskRowProps {
   currentUser?: User;
   onEdit?: (task: Task) => void;
   onDelete?: (task: Task) => void;
+  onView?: (task: Task) => void;
 }
 
-export function TaskRow({ task, projects, users, currentUser, onEdit, onDelete }: TaskRowProps) {
+export function TaskRow({ task, projects, users, currentUser, onEdit, onDelete, onView }: TaskRowProps) {
   const assignee = users.find((user) => user.id === task.assigneeId);
   const canEdit = currentUser && (currentUser.role === UserRole.ADMIN || task.assigneeId === currentUser.id);
   return (
@@ -23,7 +24,13 @@ export function TaskRow({ task, projects, users, currentUser, onEdit, onDelete }
           <TaskStatusBadge status={task.status} />
           {isOverdue(task) && <span className="overdue">Overdue</span>}
         </div>
-        <strong>{task.title}</strong>
+        {onView ? (
+          <button className="task-title-button" onClick={() => onView(task)}>
+            {task.title}
+          </button>
+        ) : (
+          <strong>{task.title}</strong>
+        )}
         <p>{task.description || 'No description.'}</p>
       </div>
       <div className="task-cell project-cell">
@@ -42,6 +49,11 @@ export function TaskRow({ task, projects, users, currentUser, onEdit, onDelete }
         <span>{formatDate(task.dueDate)}</span>
       </div>
       <div className="task-actions">
+        {onView && (
+          <button className="text-button" onClick={() => onView(task)}>
+            View
+          </button>
+        )}
         {canEdit && (
           <button className="button secondary" onClick={() => onEdit?.(task)}>
             {currentUser?.role === UserRole.ADMIN ? 'Edit' : 'Update'}

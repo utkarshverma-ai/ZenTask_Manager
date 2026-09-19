@@ -2,6 +2,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { AuthProvider } from './providers/AuthProvider';
 import { AppRouter } from './router';
 import { isSupabaseConfigured } from '../lib/supabase/client';
+import { ToastProvider } from '../components/ui/ToastProvider';
 export default function App() {
   if (!isSupabaseConfigured)
     return (
@@ -18,9 +19,11 @@ export default function App() {
     );
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <AppRouter />
-      </AuthProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <AppRouter />
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

@@ -14,6 +14,7 @@ ZenTask Manager is a focused project-delivery workspace for teams that need clea
 - Required work summary when a member submits a task for review
 - Realtime refreshes for projects, memberships, and tasks
 - Workspace activity log, responsive app shell, and accessible dialogs
+- Password reset flow and task detail history using existing activity logs
 
 ## Architecture
 
@@ -110,6 +111,8 @@ Submitting for review requires a non-empty work summary. Admins can review a sub
 4. Deploy with the default build command, `npm run build`.
 5. Add the deployed URL to Supabase Auth URL Configuration.
 
+For password recovery, set the production Site URL in Supabase Auth and add `https://your-domain/reset-password` (and the local equivalent) to the Redirect URLs allow list. ZenTask sends reset links back to this route.
+
 Use `frontend` as the Vercel Root Directory. [`frontend/vercel.json`](frontend/vercel.json) provides the SPA rewrite so BrowserRouter routes work after a direct refresh.
 
 ## Security and environment variables
@@ -121,7 +124,7 @@ Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` belong in browser configur
 ## Known limitations
 
 - Users must sign up before an administrator can change their role. The current product does not send invitations.
-- There is no password-reset view, task attachment system, notification center, or audit export yet.
+- There is no task attachment system, notification center, or audit export yet.
 - End-to-end tests and Supabase RLS integration tests need a dedicated test project and are not included in this repository.
 
 ## Suggested next steps

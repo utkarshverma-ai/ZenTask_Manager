@@ -1,3 +1,4 @@
+import { Session } from '@supabase/supabase-js';
 import { User, UserRole } from '../types';
 import { getSupabase, supabase } from '../lib/supabase/client';
 import { mapUser } from '../lib/supabase/mappers';
@@ -25,6 +26,15 @@ async function profileFor(
   return profile;
 }
 export const authService = {
+  async requestPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await getSupabase().auth.resetPasswordForEmail(email, { redirectTo });
+    fail(error);
+  },
+  async updatePassword(password: string) {
+    const { error } = await getSupabase().auth.updateUser({ password });
+    fail(error);
+  },
   async signUp(email: string, password: string, fullName: string) {
     const { data, error } = await getSupabase().auth.signUp({
       email,
@@ -50,5 +60,8 @@ export const authService = {
     const { data, error } = await supabase.auth.getSession();
     fail(error);
     return data.session ? profileFor(data.session.user.id, data.session.user) : null;
+  },
+  async getUserForSession(session: Session) {
+    return profileFor(session.user.id, session.user);
   },
 };
