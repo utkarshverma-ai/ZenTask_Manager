@@ -103,7 +103,6 @@ export function TasksPage() {
         onSortChange={setSort}
         onClear={() => {
           setSearch('');
-          setStatusFilter('');
           setPriority('');
           setAssigneeId('');
           setSort('due-asc');

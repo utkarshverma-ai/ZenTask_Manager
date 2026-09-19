@@ -54,13 +54,13 @@ export function TaskRow({ task, projects, users, currentUser, onEdit, onDelete, 
             View
           </button>
         )}
-        {canEdit && (
-          <button className="button secondary" onClick={() => onEdit?.(task)}>
+        {canEdit && onEdit && (
+          <button className="button secondary" onClick={() => onEdit(task)}>
             {currentUser?.role === UserRole.ADMIN ? 'Edit' : 'Update'}
           </button>
         )}
-        {currentUser?.role === UserRole.ADMIN && (
-          <button className="text-button destructive" onClick={() => onDelete?.(task)}>
+        {currentUser?.role === UserRole.ADMIN && onDelete && (
+          <button className="text-button destructive" onClick={() => onDelete(task)}>
             Delete
           </button>
         )}
