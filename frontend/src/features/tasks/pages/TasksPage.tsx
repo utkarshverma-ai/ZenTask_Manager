@@ -20,7 +20,7 @@ export function TasksPage() {
   const { tasks, projects, users, loading, error, refresh } = useWorkspace();
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
+  const status = searchParams.get('status') ?? '';
   const [priority, setPriority] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
   const [sort, setSort] = useState('due-asc');
@@ -33,6 +33,11 @@ export function TasksPage() {
   const setProjectId = (value: string) => {
     const next = new URLSearchParams(searchParams);
     value ? next.set('project', value) : next.delete('project');
+    setSearchParams(next);
+  };
+  const setStatusFilter = (value: string) => {
+    const next = new URLSearchParams(searchParams);
+    value ? next.set('status', value) : next.delete('status');
     setSearchParams(next);
   };
   const shown = useMemo(() => {
@@ -91,18 +96,21 @@ export function TasksPage() {
         showAssignee={user?.role === UserRole.ADMIN}
         onSearchChange={setSearch}
         onProjectChange={setProjectId}
-        onStatusChange={setStatus}
+        onStatusChange={setStatusFilter}
         onPriorityChange={setPriority}
         onAssigneeChange={setAssigneeId}
         sort={sort}
         onSortChange={setSort}
         onClear={() => {
           setSearch('');
-          setStatus('');
+          setStatusFilter('');
           setPriority('');
           setAssigneeId('');
           setSort('due-asc');
-          setProjectId('');
+          const next = new URLSearchParams(searchParams);
+          next.delete('project');
+          next.delete('status');
+          setSearchParams(next);
         }}
       />
       {shown.length ? (

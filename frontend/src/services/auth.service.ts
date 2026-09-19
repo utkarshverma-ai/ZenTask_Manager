@@ -1,3 +1,4 @@
+import { Session } from '@supabase/supabase-js';
 import { User, UserRole } from '../types';
 import { getSupabase, supabase } from '../lib/supabase/client';
 import { mapUser } from '../lib/supabase/mappers';
@@ -59,5 +60,8 @@ export const authService = {
     const { data, error } = await supabase.auth.getSession();
     fail(error);
     return data.session ? profileFor(data.session.user.id, data.session.user) : null;
+  },
+  async getUserForSession(session: Session) {
+    return profileFor(session.user.id, session.user);
   },
 };

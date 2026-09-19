@@ -3,8 +3,10 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import { useAuth } from '../../app/providers/AuthProvider';
+import { useToast } from '../../components/ui/ToastProvider';
 export function AuthPage() {
   const { user, setUser, error: sessionError } = useAuth();
+  const { showToast } = useToast();
   const [login, setLogin] = useState(true);
   const [resetRequest, setResetRequest] = useState(false);
   const [name, setName] = useState('');
@@ -20,7 +22,7 @@ export function AuthPage() {
     try {
       if (resetRequest) {
         await authService.requestPasswordReset(email);
-        setError('Check your inbox for a password reset link.');
+        showToast('Password reset link sent. Check your inbox.', 'info');
       } else {
         setUser(login ? await authService.signIn(email, password) : await authService.signUp(email, password, name));
       }

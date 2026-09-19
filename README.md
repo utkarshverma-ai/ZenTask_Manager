@@ -124,7 +124,7 @@ Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` belong in browser configur
 ## Known limitations
 
 - Users must sign up before an administrator can change their role. The current product does not send invitations.
-- There is no password-reset view, task attachment system, notification center, or audit export yet.
+- There is no task attachment system, notification center, or audit export yet.
 - End-to-end tests and Supabase RLS integration tests need a dedicated test project and are not included in this repository.
 
 ## Suggested next steps

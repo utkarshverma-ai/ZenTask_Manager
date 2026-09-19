@@ -1,16 +1,17 @@
 import { FormEvent, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import { useToast } from '../../components/ui/ToastProvider';
+import { useAuth } from '../../app/providers/AuthProvider';
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const { isPasswordRecovery, recoveryReady, logout } = useAuth();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
-  const [complete, setComplete] = useState(false);
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (password.length < 6) return setError('Use at least 6 characters for your new password.');
@@ -19,16 +20,34 @@ export function ResetPasswordPage() {
     setError('');
     try {
       await authService.updatePassword(password);
-      setComplete(true);
-      showToast('Password updated');
-      window.setTimeout(() => navigate('/login', { replace: true }), 900);
+      await logout();
+      showToast('Password updated. Sign in with your new password.');
+      navigate('/login', { replace: true });
     } catch (issue) {
       setError(issue instanceof Error ? issue.message : 'Unable to update your password.');
     } finally {
       setPending(false);
     }
   };
-  if (complete) return <Navigate to="/login" replace />;
+  if (!recoveryReady)
+    return (
+      <main className="auth-main reset-page">
+        <p className="muted">Validating recovery link…</p>
+      </main>
+    );
+  if (!isPasswordRecovery)
+    return (
+      <main className="auth-main reset-page">
+        <section className="auth-card">
+          <p className="eyebrow">Account recovery</p>
+          <h1>Reset link unavailable</h1>
+          <p className="muted">This password reset link is invalid or has expired.</p>
+          <Link className="button primary wide" to="/login">
+            Return to sign in
+          </Link>
+        </section>
+      </main>
+    );
   return (
     <main className="auth-main reset-page">
       <form className="auth-card" onSubmit={submit}>
