@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import { useToast } from '../../components/ui/ToastProvider';
 import { useAuth } from '../../app/providers/AuthProvider';
+import { AuthFooter } from './components/AuthFooter';
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -32,59 +33,68 @@ export function ResetPasswordPage() {
   if (!recoveryReady)
     return (
       <main className="auth-main reset-page">
-        <p className="muted">Validating recovery link…</p>
+        <div className="auth-form-stack">
+          <p className="muted">Validating recovery link…</p>
+          <AuthFooter />
+        </div>
       </main>
     );
   if (!isPasswordRecovery)
     return (
       <main className="auth-main reset-page">
-        <section className="auth-card">
-          <p className="eyebrow">Account recovery</p>
-          <h1>Reset link unavailable</h1>
-          <p className="muted">This password reset link is invalid or has expired.</p>
-          <Link className="button primary wide" to="/login">
-            Return to sign in
-          </Link>
-        </section>
+        <div className="auth-form-stack">
+          <section className="auth-card">
+            <p className="eyebrow">Account recovery</p>
+            <h1>Reset link unavailable</h1>
+            <p className="muted">This password reset link is invalid or has expired.</p>
+            <Link className="button primary wide" to="/login">
+              Return to sign in
+            </Link>
+          </section>
+          <AuthFooter />
+        </div>
       </main>
     );
   return (
     <main className="auth-main reset-page">
-      <form className="auth-card" onSubmit={submit}>
-        <p className="eyebrow">Account recovery</p>
-        <h1>Set a new password</h1>
-        <p className="muted">Choose a new password for your ZenTask account.</p>
-        <label>
-          New password
-          <input
-            required
-            minLength={6}
-            type="password"
-            autoComplete="new-password"
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-          />
-        </label>
-        <label>
-          Confirm new password
-          <input
-            required
-            minLength={6}
-            type="password"
-            autoComplete="new-password"
-            value={confirm}
-            onChange={(event) => setConfirm(event.target.value)}
-          />
-        </label>
-        {error && (
-          <div className="field-error" role="alert">
-            {error}
-          </div>
-        )}
-        <button className="button primary wide" disabled={pending}>
-          {pending ? 'Updating…' : 'Update password'}
-        </button>
-      </form>
+      <div className="auth-form-stack">
+        <form className="auth-card" onSubmit={submit}>
+          <p className="eyebrow">Account recovery</p>
+          <h1>Set a new password</h1>
+          <p className="muted">Choose a new password for your ZenTask account.</p>
+          <label>
+            New password
+            <input
+              required
+              minLength={6}
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+            />
+          </label>
+          <label>
+            Confirm new password
+            <input
+              required
+              minLength={6}
+              type="password"
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(event) => setConfirm(event.target.value)}
+            />
+          </label>
+          {error && (
+            <div className="field-error" role="alert">
+              {error}
+            </div>
+          )}
+          <button className="button primary wide" disabled={pending}>
+            {pending ? 'Updating…' : 'Update password'}
+          </button>
+        </form>
+        <AuthFooter />
+      </div>
     </main>
   );
 }

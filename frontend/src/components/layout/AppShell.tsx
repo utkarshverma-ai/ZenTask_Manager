@@ -3,6 +3,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { useState } from 'react';
 import { useAuth } from '../../app/providers/AuthProvider';
 import { initials } from '../../utils/workspace';
+import { AppFooter } from './AppFooter';
 const links = [
   { to: '/dashboard', label: 'Overview', icon: LayoutDashboard },
   { to: '/projects', label: 'Projects', icon: FolderKanban },
@@ -65,6 +66,7 @@ export function AppShell() {
         <main id="main-content" tabIndex={-1}>
           <Outlet />
         </main>
+        <AppFooter />
       </div>
     </div>
   );
