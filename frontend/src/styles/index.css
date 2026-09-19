@@ -1,33 +1,35 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --color-app-bg: #f4f7fb;
+  --color-app-bg: #f7f6f2;
   --color-surface: #fff;
-  --color-surface-subtle: #f8fafc;
-  --color-surface-muted: #eef2f7;
-  --color-sidebar: #0b1220;
-  --color-sidebar-elevated: #111b2e;
-  --color-sidebar-border: #22304a;
-  --color-sidebar-text: #cbd5e1;
-  --color-sidebar-text-muted: #8fa0b8;
-  --color-text: #111827;
-  --color-text-secondary: #64748b;
-  --color-text-soft: #94a3b8;
-  --color-border: #dce3ed;
-  --color-border-soft: #e9eef5;
-  --color-primary: #3157d5;
-  --color-primary-hover: #2747b4;
-  --color-primary-soft: #eaf0ff;
-  --color-accent: #0f9384;
-  --color-accent-soft: #e7f7f4;
-  --color-warm: #d88924;
-  --color-warm-soft: #fff6e7;
-  --color-success: #14865d;
-  --color-success-soft: #e8f7f0;
-  --color-danger: #c24141;
-  --color-danger-soft: #fff0f0;
-  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 8px 24px rgb(15 23 42 / 0.045);
-  --shadow-elevated: 0 18px 50px rgb(15 23 42 / 0.16);
+  --color-surface-subtle: #f1f0eb;
+  --color-surface-muted: #ebeae4;
+  --color-sidebar: #171a18;
+  --color-sidebar-elevated: #222723;
+  --color-sidebar-active: #1d2c24;
+  --color-sidebar-border: #303730;
+  --color-sidebar-text: #d8ded9;
+  --color-sidebar-text-muted: #909b92;
+  --color-text: #1a1d1b;
+  --color-text-secondary: #68716b;
+  --color-text-soft: #919891;
+  --color-border: #dddcd5;
+  --color-border-soft: #ebe9e2;
+  --color-primary: #18745a;
+  --color-primary-hover: #125d48;
+  --color-primary-soft: #e7f3ed;
+  --color-accent: #c7822b;
+  --color-accent-hover: #a96820;
+  --color-accent-soft: #fff2de;
+  --color-success: #2e7d5b;
+  --color-success-soft: #e8f4ed;
+  --color-warning: #b66d22;
+  --color-warning-soft: #fff1dd;
+  --color-danger: #b7463e;
+  --color-danger-soft: #faecea;
+  --shadow-card: 0 1px 2px rgb(23 26 24 / 0.04), 0 8px 24px rgb(23 26 24 / 0.045);
+  --shadow-elevated: 0 18px 50px rgb(23 26 24 / 0.16);
   color: var(--color-text);
   background: var(--color-app-bg);
   font-family: Manrope, ui-sans-serif, system-ui, sans-serif;
@@ -64,7 +66,7 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 3px solid rgb(49 87 213 / 0.35);
+  outline: 3px solid #7fc3ab;
   outline-offset: 2px;
 }
 
@@ -119,11 +121,11 @@ select:focus-visible {
   flex: 0 0 34px;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgb(147 177 255 / 0.62);
+  border: 1px solid rgb(158 210 184 / 0.62);
   border-radius: 10px;
   color: #fff;
   background: var(--color-primary);
-  box-shadow: inset 0 -8px 14px rgb(15 23 42 / 0.18);
+  box-shadow: inset 0 -8px 14px rgb(23 26 24 / 0.18);
   font-family: 'DM Mono', monospace;
   font-size: 11px;
   font-weight: 500;
@@ -169,7 +171,7 @@ select:focus-visible {
 }
 .nav-link.active {
   color: #fff;
-  background: var(--color-sidebar-elevated);
+  background: var(--color-sidebar-active);
   box-shadow: inset 3px 0 0 var(--color-primary);
 }
 .account {
@@ -232,7 +234,7 @@ select:focus-visible {
   height: 32px;
   flex: 0 0 32px;
   place-items: center;
-  border: 1px solid #cdd9fa;
+  border: 1px solid #c9dfd2;
   border-radius: 50%;
   color: var(--color-primary);
   background: var(--color-primary-soft);
@@ -242,7 +244,7 @@ select:focus-visible {
 }
 .sidebar .avatar {
   border-color: rgb(255 255 255 / 0.12);
-  color: #dce6ff;
+  color: var(--color-sidebar-text);
   background: var(--color-sidebar-elevated);
 }
 .mobile-only,
@@ -336,19 +338,19 @@ select:focus-visible {
 .primary {
   color: #fff;
   background: var(--color-primary);
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.12);
+  box-shadow: 0 1px 2px rgb(23 26 24 / 0.12);
 }
 .primary:hover:not(:disabled) {
   background: var(--color-primary-hover);
-  box-shadow: 0 5px 12px rgb(49 87 213 / 0.22);
+  box-shadow: 0 5px 12px rgb(24 116 90 / 0.22);
 }
 .secondary {
   border: 1px solid var(--color-border);
-  color: #334155;
+  color: #39423b;
   background: var(--color-surface);
 }
 .secondary:hover:not(:disabled) {
-  border-color: #bbc8da;
+  border-color: #c7cec7;
   background: var(--color-surface-subtle);
 }
 .danger {
@@ -356,18 +358,18 @@ select:focus-visible {
   background: var(--color-danger);
 }
 .danger:hover:not(:disabled) {
-  background: #a43232;
+  background: #963b35;
 }
 .danger-outline,
 .destructive {
   color: var(--color-danger);
 }
 .danger-outline {
-  border: 1px solid #f0c3c3;
+  border: 1px solid #edc4c1;
   background: #fff;
 }
 .danger-outline:hover:not(:disabled) {
-  border-color: #e99d9d;
+  border-color: #df9d97;
   background: var(--color-danger-soft);
 }
 .text-button {
@@ -381,7 +383,7 @@ select:focus-visible {
   text-decoration: underline;
 }
 .text-button.destructive:hover:not(:disabled) {
-  color: #a43232;
+  color: #963b35;
 }
 
 /* Dashboard surfaces */
@@ -396,7 +398,7 @@ select:focus-visible {
   border-radius: 13px;
 }
 .metric-grid > a:focus-visible {
-  outline: 3px solid rgb(49 87 213 / 0.35);
+  outline: 3px solid #7fc3ab;
   outline-offset: 2px;
 }
 .metric,
@@ -421,8 +423,8 @@ select:focus-visible {
     transform 160ms ease;
 }
 .metric-grid > a .metric:hover {
-  border-color: #c3d0f6;
-  box-shadow: 0 10px 24px rgb(15 23 42 / 0.09);
+  border-color: #c8dfd3;
+  box-shadow: 0 10px 24px rgb(23 26 24 / 0.09);
   transform: translateY(-2px);
 }
 .metric svg {
@@ -435,12 +437,12 @@ select:focus-visible {
   background: var(--color-primary-soft);
 }
 .metric-grid > :nth-child(2) .metric svg {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 .metric-grid > :nth-child(3) .metric svg {
-  color: var(--color-warm);
-  background: var(--color-warm-soft);
+  color: var(--color-accent);
+  background: var(--color-accent-soft);
 }
 .metric.alerting svg {
   color: var(--color-danger);
@@ -562,7 +564,7 @@ select:focus-visible {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--color-accent);
+  background: var(--color-primary);
 }
 .activity-list {
   display: grid;
@@ -575,7 +577,7 @@ select:focus-visible {
   position: relative;
   display: flex;
   gap: 11px;
-  color: #475569;
+  color: #4e5750;
   font-size: 12px;
   line-height: 1.45;
 }
@@ -605,7 +607,7 @@ select:focus-visible {
   height: 9px;
   flex: 0 0 9px;
   margin-top: 4px;
-  border: 2px solid var(--color-accent);
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
   background: var(--color-surface);
 }
@@ -629,8 +631,8 @@ select:focus-visible {
     transform 160ms ease;
 }
 .project-card:hover {
-  border-color: #cbd7ee;
-  box-shadow: 0 12px 28px rgb(15 23 42 / 0.08);
+  border-color: #cedbd3;
+  box-shadow: 0 12px 28px rgb(23 26 24 / 0.08);
   transform: translateY(-2px);
 }
 .project-card-head,
@@ -660,12 +662,12 @@ select:focus-visible {
   white-space: nowrap;
 }
 .project-status {
-  color: var(--color-primary);
-  background: var(--color-primary-soft);
+  color: #58615a;
+  background: var(--color-surface-muted);
 }
 .project-status.active {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
 }
 .project-status.completed {
   color: var(--color-success);
@@ -797,8 +799,8 @@ select:focus-visible {
     box-shadow 150ms ease;
 }
 .team-card:hover {
-  border-color: #cbd7ee;
-  box-shadow: 0 10px 24px rgb(15 23 42 / 0.07);
+  border-color: #cedbd3;
+  box-shadow: 0 10px 24px rgb(23 26 24 / 0.07);
 }
 .team-card h2 {
   margin: 2px 0 3px;
@@ -812,8 +814,8 @@ select:focus-visible {
   font-size: 11px;
 }
 .role-badge {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: #58615a;
+  background: var(--color-surface-muted);
 }
 .role-badge.admin {
   color: var(--color-primary);
@@ -821,18 +823,18 @@ select:focus-visible {
 }
 .access-note {
   margin: -4px 0 20px;
-  border: 1px solid #cfece7;
-  border-left: 3px solid var(--color-accent);
+  border: 1px solid #cfe3d8;
+  border-left: 3px solid var(--color-primary);
   border-radius: 9px;
   padding: 13px 15px;
-  color: #36545a;
-  background: var(--color-accent-soft);
+  color: #405248;
+  background: var(--color-primary-soft);
   font-size: 12px;
   line-height: 1.55;
 }
 .access-note strong {
   margin-right: 5px;
-  color: #0c655c;
+  color: var(--color-primary-hover);
 }
 
 /* Tasks */
@@ -852,11 +854,11 @@ select:focus-visible {
   border-radius: 9px;
   padding: 0 11px;
   background: var(--color-surface);
-  box-shadow: 0 1px 1px rgb(15 23 42 / 0.02);
+  box-shadow: 0 1px 1px rgb(23 26 24 / 0.02);
 }
 .filters label:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(49 87 213 / 0.12);
+  box-shadow: 0 0 0 3px rgb(24 116 90 / 0.14);
 }
 .filters label svg {
   width: 16px;
@@ -867,7 +869,7 @@ select:focus-visible {
   min-width: 0;
   border: 0;
   outline: 0;
-  color: #334155;
+  color: #39423b;
   background: transparent;
   font-size: 13px;
 }
@@ -878,11 +880,11 @@ select:focus-visible {
   border-radius: 9px;
   padding: 0 28px 0 11px;
   background: var(--color-surface);
-  box-shadow: 0 1px 1px rgb(15 23 42 / 0.02);
+  box-shadow: 0 1px 1px rgb(23 26 24 / 0.02);
 }
 .filters select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(49 87 213 / 0.12);
+  box-shadow: 0 0 0 3px rgb(24 116 90 / 0.14);
 }
 .filters .button {
   min-height: 42px;
@@ -924,7 +926,7 @@ select:focus-visible {
   border-bottom: 0;
 }
 .task-row:hover {
-  background: #fbfcff;
+  background: #fbfbf8;
 }
 .task-title > div {
   display: flex;
@@ -962,7 +964,7 @@ select:focus-visible {
   text-decoration: underline;
 }
 .badge.todo {
-  color: #475569;
+  color: #58615a;
   background: var(--color-surface-muted);
 }
 .badge.progress {
@@ -970,8 +972,8 @@ select:focus-visible {
   background: var(--color-primary-soft);
 }
 .badge.review {
-  color: var(--color-warm);
-  background: var(--color-warm-soft);
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
 }
 .badge.done {
   color: var(--color-success);
@@ -983,16 +985,16 @@ select:focus-visible {
   background: var(--color-danger-soft);
 }
 .priority.medium {
-  color: var(--color-warm);
-  background: var(--color-warm-soft);
+  color: var(--color-warning);
+  background: var(--color-warning-soft);
 }
 .priority.low {
-  color: var(--color-accent);
-  background: var(--color-accent-soft);
+  color: #58615a;
+  background: var(--color-surface-muted);
 }
 .task-cell {
   min-width: 0;
-  color: #475569;
+  color: #4e5750;
   font-size: 12px;
 }
 .task-cell a {
@@ -1087,7 +1089,7 @@ select:focus-visible {
 }
 .work-summary p {
   margin: 0;
-  color: #475569;
+  color: #4e5750;
   font-size: 13px;
   line-height: 1.65;
   white-space: pre-wrap;
@@ -1097,7 +1099,7 @@ select:focus-visible {
   display: flex;
   gap: 10px;
   padding-bottom: 12px;
-  color: #475569;
+  color: #4e5750;
   font-size: 12px;
 }
 .timeline-item > span {
@@ -1106,7 +1108,7 @@ select:focus-visible {
   height: 9px;
   flex: 0 0 9px;
   margin-top: 4px;
-  border: 2px solid var(--color-accent);
+  border: 2px solid var(--color-primary);
   border-radius: 50%;
   background: var(--color-surface);
 }
@@ -1134,7 +1136,7 @@ select:focus-visible {
   display: grid;
   place-items: center;
   padding: 16px;
-  background: rgb(11 18 32 / 0.62);
+  background: rgb(23 26 24 / 0.62);
 }
 .dialog {
   width: min(650px, 100%);
@@ -1176,7 +1178,7 @@ select:focus-visible {
 .auth-card label {
   display: grid;
   gap: 7px;
-  color: #334155;
+  color: #39423b;
   font-size: 12px;
   font-weight: 800;
 }
@@ -1187,7 +1189,7 @@ select:focus-visible {
 .auth-card input {
   width: 100%;
   min-height: 42px;
-  border: 1px solid #cfd9e6;
+  border: 1px solid #d1d5ce;
   border-radius: 9px;
   padding: 10px 11px;
   color: var(--color-text);
@@ -1201,7 +1203,7 @@ select:focus-visible {
 }
 .form-grid output {
   display: block;
-  color: #475569;
+  color: #4e5750;
   background: var(--color-surface-subtle);
 }
 .form-grid input:focus,
@@ -1209,7 +1211,7 @@ select:focus-visible {
 .form-grid select:focus,
 .auth-card input:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(49 87 213 / 0.13);
+  box-shadow: 0 0 0 3px rgb(24 116 90 / 0.14);
 }
 .form-grid input:disabled,
 .form-grid textarea:disabled,
@@ -1229,7 +1231,7 @@ select:focus-visible {
 }
 .form-grid legend {
   margin-bottom: 8px;
-  color: #334155;
+  color: #39423b;
   font-size: 12px;
   font-weight: 800;
 }
@@ -1266,10 +1268,10 @@ select:focus-visible {
   margin-top: 7px;
 }
 .field-error {
-  border: 1px solid #f2c6c6;
+  border: 1px solid #efc9c5;
   border-radius: 8px;
   padding: 10px;
-  color: #a43232;
+  color: #963b35;
   background: var(--color-danger-soft);
   font-size: 12px;
 }
@@ -1322,10 +1324,10 @@ select:focus-visible {
   align-items: flex-start;
   gap: 10px;
   margin-bottom: 18px;
-  border: 1px solid #f2c6c6;
+  border: 1px solid #efc9c5;
   border-radius: 10px;
   padding: 13px;
-  color: #9d3030;
+  color: #963b35;
   background: var(--color-danger-soft);
   font-size: 12px;
 }
@@ -1351,12 +1353,12 @@ select:focus-visible {
   display: flex;
   align-items: center;
   gap: 10px;
-  border: 1px solid #cbd8fa;
+  border: 1px solid #c9dfd2;
   border-left: 4px solid var(--color-primary);
   border-radius: 10px;
   padding: 11px 11px 11px 13px;
-  color: #334155;
-  background: #f8faff;
+  color: #39423b;
+  background: var(--color-primary-soft);
   box-shadow: var(--shadow-elevated);
   font-size: 13px;
   font-weight: 700;
@@ -1366,17 +1368,17 @@ select:focus-visible {
   color: var(--color-primary);
 }
 .toast.success {
-  border-color: #bfe7da;
+  border-color: #c8e4d5;
   border-left-color: var(--color-success);
-  background: #f2fbf7;
+  background: var(--color-success-soft);
 }
 .toast.success > svg {
   color: var(--color-success);
 }
 .toast.error {
-  border-color: #f0c5c5;
+  border-color: #edc4c1;
   border-left-color: var(--color-danger);
-  background: #fff7f7;
+  background: var(--color-danger-soft);
 }
 .toast.error > svg {
   color: var(--color-danger);
@@ -1432,7 +1434,7 @@ select:focus-visible {
   margin-bottom: 80px;
 }
 .auth-aside .eyebrow {
-  color: #a9c2ff;
+  color: #edbd78;
 }
 .auth-aside h1 {
   max-width: 620px;
@@ -1463,7 +1465,7 @@ select:focus-visible {
 }
 .auth-aside li svg {
   width: 17px;
-  color: #35b5a6;
+  color: #69b598;
 }
 .auth-main {
   display: grid;
@@ -1495,10 +1497,10 @@ select:focus-visible {
   width: 100%;
 }
 .notice {
-  border: 1px solid #cbd8fa;
+  border: 1px solid #c9dfd2;
   border-radius: 8px;
   padding: 10px;
-  color: #3157a3;
+  color: #285d4b;
   background: var(--color-primary-soft);
   font-size: 11px;
   line-height: 1.5;
@@ -1545,7 +1547,7 @@ select:focus-visible {
     display: block;
     border: 0;
     padding: 0;
-    background: rgb(11 18 32 / 0.46);
+    background: rgb(23 26 24 / 0.46);
   }
   .mobile-only.icon-button {
     display: grid;
