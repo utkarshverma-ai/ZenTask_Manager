@@ -25,6 +25,7 @@ export function OverviewPage() {
       new Date(`${task.dueDate}T23:59:59`).getTime() - Date.now() < 7 * 86400000,
   ).length;
   const overdue = scopedTasks.filter(isOverdue).length;
+  const waitingForReview = tasks.filter((task) => task.status === TaskStatus.READY_FOR_REVIEW).length;
   const attention = scopedTasks
     .filter((task) => isOverdue(task) || task.status === TaskStatus.READY_FOR_REVIEW)
     .slice(0, 6);
@@ -41,7 +42,14 @@ export function OverviewPage() {
       note: `${scopedTasks.filter((task) => task.status === TaskStatus.DONE).length} completed`,
       icon: ClipboardList,
     },
-    { label: 'Due soon', value: dueSoon, note: 'Within the next 7 days', icon: CalendarDays },
+    user?.role === UserRole.ADMIN
+      ? {
+          label: 'Waiting for review',
+          value: waitingForReview,
+          note: waitingForReview ? 'Submitted tasks need a decision' : 'Review queue is clear',
+          icon: CheckCircle2,
+        }
+      : { label: 'Due soon', value: dueSoon, note: 'Within the next 7 days', icon: CalendarDays },
     {
       label: 'Overdue',
       value: overdue,

@@ -7,6 +7,7 @@ interface TaskFiltersProps {
   status: string;
   priority: string;
   assigneeId: string;
+  sort: string;
   projects: Project[];
   users: User[];
   showAssignee: boolean;
@@ -15,6 +16,8 @@ interface TaskFiltersProps {
   onStatusChange: (value: string) => void;
   onPriorityChange: (value: string) => void;
   onAssigneeChange: (value: string) => void;
+  onSortChange: (value: string) => void;
+  onClear: () => void;
 }
 
 export function TaskFilters(props: TaskFiltersProps) {
@@ -71,6 +74,15 @@ export function TaskFilters(props: TaskFiltersProps) {
           ))}
         </select>
       )}
+      <select aria-label="Sort tasks" value={props.sort} onChange={(event) => props.onSortChange(event.target.value)}>
+        <option value="due-asc">Due date — earliest</option>
+        <option value="due-desc">Due date — latest</option>
+        <option value="priority">Priority — high to low</option>
+        <option value="created">Recently created</option>
+      </select>
+      <button className="button secondary" type="button" onClick={props.onClear}>
+        Clear filters
+      </button>
     </section>
   );
 }

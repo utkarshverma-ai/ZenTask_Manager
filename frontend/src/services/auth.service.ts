@@ -25,6 +25,15 @@ async function profileFor(
   return profile;
 }
 export const authService = {
+  async requestPasswordReset(email: string) {
+    const redirectTo = `${window.location.origin}/reset-password`;
+    const { error } = await getSupabase().auth.resetPasswordForEmail(email, { redirectTo });
+    fail(error);
+  },
+  async updatePassword(password: string) {
+    const { error } = await getSupabase().auth.updateUser({ password });
+    fail(error);
+  },
   async signUp(email: string, password: string, fullName: string) {
     const { data, error } = await getSupabase().auth.signUp({
       email,

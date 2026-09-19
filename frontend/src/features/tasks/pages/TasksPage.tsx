@@ -5,6 +5,7 @@ import { useAuth } from '../../../app/providers/AuthProvider';
 import { useWorkspace } from '../../../app/providers/WorkspaceProvider';
 import { PageHeader } from '../../../components/ui/PageHeader';
 import { ConfirmDialog } from '../../../components/ui/Dialog';
+import { useToast } from '../../../components/ui/ToastProvider';
 import { EmptyState, ErrorAlert, LoadingState } from '../../../components/ui/State';
 import { useMutation } from '../../../hooks/useMutation';
 import { tasksService } from '../../../services/tasks.service';
@@ -12,6 +13,7 @@ import { Task, TaskDraft, UserRole } from '../../../types';
 import { TaskDialog } from '../components/TaskDialog';
 import { TaskFilters } from '../components/TaskFilters';
 import { TaskList } from '../components/TaskList';
+import { TaskDetails } from '../components/TaskDetails';
 
 export function TasksPage() {
   const { user } = useAuth();
@@ -21,33 +23,46 @@ export function TasksPage() {
   const [status, setStatus] = useState('');
   const [priority, setPriority] = useState('');
   const [assigneeId, setAssigneeId] = useState('');
+  const [sort, setSort] = useState('due-asc');
   const [editing, setEditing] = useState<Task | null | undefined>(undefined);
   const [removing, setRemoving] = useState<Task | null>(null);
+  const [details, setDetails] = useState<Task | null>(null);
   const mutation = useMutation();
+  const { showToast } = useToast();
   const projectId = searchParams.get('project') ?? '';
   const setProjectId = (value: string) => {
     const next = new URLSearchParams(searchParams);
     value ? next.set('project', value) : next.delete('project');
     setSearchParams(next);
   };
-  const shown = useMemo(
-    () =>
-      tasks.filter(
-        (task) =>
-          (!projectId || task.projectId === projectId) &&
-          (!status || task.status === status) &&
-          (!priority || task.priority === priority) &&
-          (!assigneeId || task.assigneeId === assigneeId) &&
-          `${task.title} ${task.description}`.toLowerCase().includes(search.toLowerCase()),
-      ),
-    [tasks, projectId, status, priority, assigneeId, search],
-  );
+  const shown = useMemo(() => {
+    const filtered = tasks.filter(
+      (task) =>
+        (!projectId || task.projectId === projectId) &&
+        (!status || task.status === status) &&
+        (!priority || task.priority === priority) &&
+        (!assigneeId || task.assigneeId === assigneeId) &&
+        `${task.title} ${task.description}`.toLowerCase().includes(search.toLowerCase()),
+    );
+    return filtered.sort((left, right) =>
+      sort === 'due-desc'
+        ? right.dueDate.localeCompare(left.dueDate)
+        : sort === 'priority'
+          ? { High: 3, Medium: 2, Low: 1 }[right.priority] - { High: 3, Medium: 2, Low: 1 }[left.priority]
+          : sort === 'created'
+            ? right.createdAt.localeCompare(left.createdAt)
+            : left.dueDate.localeCompare(right.dueDate),
+    );
+  }, [tasks, projectId, status, priority, assigneeId, search, sort]);
   if (loading) return <LoadingState />;
   const saveTask = async (task: Task | null, draft: TaskDraft) =>
     mutation.run(async () => {
       if (task && user?.role !== UserRole.ADMIN) await tasksService.updateStatus(task.id, draft.status, draft.workLog);
       else await tasksService.save(draft, user!);
       await refresh();
+      showToast(
+        task ? (draft.status === 'Ready For Review' ? 'Task submitted for review' : 'Task updated') : 'Task created',
+      );
     });
   return (
     <div className="page">
@@ -79,6 +94,16 @@ export function TasksPage() {
         onStatusChange={setStatus}
         onPriorityChange={setPriority}
         onAssigneeChange={setAssigneeId}
+        sort={sort}
+        onSortChange={setSort}
+        onClear={() => {
+          setSearch('');
+          setStatus('');
+          setPriority('');
+          setAssigneeId('');
+          setSort('due-asc');
+          setProjectId('');
+        }}
       />
       {shown.length ? (
         <TaskList
@@ -88,9 +113,23 @@ export function TasksPage() {
           currentUser={user!}
           onEdit={setEditing}
           onDelete={setRemoving}
+          onView={setDetails}
         />
       ) : (
         <EmptyState title="No tasks match this view" children="Try changing your filters or search term." />
+      )}
+      {details && (
+        <TaskDetails
+          task={details}
+          projects={projects}
+          users={users}
+          currentUser={user!}
+          onClose={() => setDetails(null)}
+          onEdit={() => {
+            setDetails(null);
+            setEditing(details);
+          }}
+        />
       )}
       {editing !== undefined && (
         <TaskDialog
@@ -116,6 +155,7 @@ export function TasksPage() {
               await tasksService.remove(removing.id);
               await refresh();
               setRemoving(null);
+              showToast('Task deleted');
             })
           }
         />

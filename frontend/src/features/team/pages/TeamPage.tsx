@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '../../../app/providers/AuthProvider';
 import { useWorkspace } from '../../../app/providers/WorkspaceProvider';
 import { PageHeader } from '../../../components/ui/PageHeader';
+import { useToast } from '../../../components/ui/ToastProvider';
 import { ErrorAlert, LoadingState } from '../../../components/ui/State';
 import { useMutation } from '../../../hooks/useMutation';
 import { teamService } from '../../../services/team.service';
@@ -15,6 +16,7 @@ export function TeamPage() {
   const { users, loading, error, refresh } = useWorkspace();
   const [open, setOpen] = useState(false);
   const mutation = useMutation();
+  const { showToast } = useToast();
   if (loading) return <LoadingState />;
   return (
     <div className="page">
@@ -48,6 +50,7 @@ export function TeamPage() {
             mutation.run(async () => {
               await teamService.updateRole(email, role);
               await refresh();
+              showToast('Team access updated');
             })
           }
         />
