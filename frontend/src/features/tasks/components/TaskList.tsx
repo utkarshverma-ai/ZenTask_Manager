@@ -14,6 +14,14 @@ interface TaskListProps {
 export function TaskList(props: TaskListProps) {
   return (
     <div className="task-list">
+      <div className="task-list-header" aria-hidden="true">
+        <span>Task</span>
+        <span>Project</span>
+        <span>Assignee</span>
+        <span>Priority</span>
+        <span>Due</span>
+        <span>{props.onEdit || props.onDelete || props.onView ? 'Actions' : ''}</span>
+      </div>
       {props.tasks.map((task) => (
         <TaskRow
           key={task.id}

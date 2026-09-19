@@ -8,7 +8,7 @@ export function TeamMemberCard({ user }: { user: User }) {
       <div>
         <h2>{user.name || 'Unnamed member'}</h2>
         <p>{user.email}</p>
-        <span className="role-badge">{user.role}</span>
+        <span className={`role-badge ${user.role.toLowerCase()}`}>{user.role}</span>
       </div>
     </article>
   );
