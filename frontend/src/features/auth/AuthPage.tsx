@@ -4,7 +4,7 @@ import { Navigate } from 'react-router-dom';
 import { authService } from '../../services/auth.service';
 import { useAuth } from '../../app/providers/AuthProvider';
 export function AuthPage() {
-  const { user, setUser } = useAuth();
+  const { user, setUser, error: sessionError } = useAuth();
   const [login, setLogin] = useState(true);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -98,9 +98,9 @@ export function AuthPage() {
               placeholder="At least 6 characters"
             />
           </label>
-          {error && (
+          {(error || sessionError) && (
             <div className="field-error" role="alert">
-              {error}
+              {error || sessionError}
             </div>
           )}
           <button className="button primary wide" disabled={loading}>

@@ -23,12 +23,17 @@ export function TaskFilters(props: TaskFiltersProps) {
       <label>
         <Search aria-hidden="true" />
         <input
+          aria-label="Search tasks"
           value={props.search}
           onChange={(event) => props.onSearchChange(event.target.value)}
           placeholder="Search tasks"
         />
       </label>
-      <select value={props.projectId} onChange={(event) => props.onProjectChange(event.target.value)}>
+      <select
+        aria-label="Project"
+        value={props.projectId}
+        onChange={(event) => props.onProjectChange(event.target.value)}
+      >
         <option value="">All projects</option>
         {props.projects.map((project) => (
           <option key={project.id} value={project.id}>
@@ -36,20 +41,28 @@ export function TaskFilters(props: TaskFiltersProps) {
           </option>
         ))}
       </select>
-      <select value={props.status} onChange={(event) => props.onStatusChange(event.target.value)}>
+      <select aria-label="Status" value={props.status} onChange={(event) => props.onStatusChange(event.target.value)}>
         <option value="">All statuses</option>
         {Object.values(TaskStatus).map((value) => (
           <option key={value}>{value}</option>
         ))}
       </select>
-      <select value={props.priority} onChange={(event) => props.onPriorityChange(event.target.value)}>
+      <select
+        aria-label="Priority"
+        value={props.priority}
+        onChange={(event) => props.onPriorityChange(event.target.value)}
+      >
         <option value="">All priorities</option>
         {Object.values(TaskPriority).map((value) => (
           <option key={value}>{value}</option>
         ))}
       </select>
       {props.showAssignee && (
-        <select value={props.assigneeId} onChange={(event) => props.onAssigneeChange(event.target.value)}>
+        <select
+          aria-label="Assignee"
+          value={props.assigneeId}
+          onChange={(event) => props.onAssigneeChange(event.target.value)}
+        >
           <option value="">All assignees</option>
           {props.users.map((user) => (
             <option key={user.id} value={user.id}>

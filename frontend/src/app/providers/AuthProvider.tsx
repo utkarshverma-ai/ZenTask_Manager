@@ -28,7 +28,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await authService.signOut();
     setUser(null);
   };
-  return <AuthContext.Provider value={{ user, loading, error, setUser, logout }}>{children}</AuthContext.Provider>;
+  const setAuthenticatedUser = (nextUser: User) => {
+    setError('');
+    setUser(nextUser);
+  };
+  return (
+    <AuthContext.Provider value={{ user, loading, error, setUser: setAuthenticatedUser, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 export const useAuth = () => {
   const value = useContext(AuthContext);

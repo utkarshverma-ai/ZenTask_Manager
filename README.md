@@ -27,7 +27,6 @@ frontend/                 React + TypeScript + Vite browser application
   src/styles/             build-owned global styling
 backend/supabase/
   migrations/             immutable PostgreSQL/RLS migration history
-docs/                     project documentation (reserved for future guides)
 ```
 
 ## Tech stack
