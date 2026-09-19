@@ -1,0 +1,7 @@
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { ActivityLog, Project, Task, User } from '../../types';
+import { workspaceService } from '../../services/workspace.service';
+type Workspace = { projects: Project[]; tasks: Task[]; users: User[]; activity: ActivityLog[]; loading: boolean; error: string; refresh: () => Promise<void>; };
+const WorkspaceContext = createContext<Workspace | null>(null);
+export function WorkspaceProvider({ children }: { children: ReactNode }) { const [data, setData] = useState<Omit<Workspace, 'loading' | 'error' | 'refresh'>>({ projects: [], tasks: [], users: [], activity: [] }); const [loading, setLoading] = useState(true); const [error, setError] = useState(''); const refresh = async () => { try { setError(''); setData(await workspaceService.load()); } catch (issue) { setError(issue instanceof Error ? issue.message : 'Unable to load workspace.'); } finally { setLoading(false); } }; useEffect(() => { void refresh(); const channel = workspaceService.subscribe(() => { void refresh(); }); return () => { void workspaceService.unsubscribe(channel); }; }, []); return <WorkspaceContext.Provider value={{ ...data, loading, error, refresh }}>{children}</WorkspaceContext.Provider>; }
+export const useWorkspace = () => { const value = useContext(WorkspaceContext); if (!value) throw new Error('useWorkspace must be used inside WorkspaceProvider'); return value; };

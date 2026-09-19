@@ -1,80 +1,133 @@
 # ZenTask Manager
 
-A centralized Vite + React + TypeScript project delivery platform backed by Supabase.
-
-## Live Demo
-
-https://zen-task-manager.vercel.app/
+ZenTask Manager is a focused project-delivery workspace for teams that need clear ownership, deadlines, and task review. The browser client is built with React, TypeScript, and Vite; Supabase (PostgreSQL, Auth, Realtime, and Row Level Security) is the backend.
 
 ## Features
 
-- Supabase email/password authentication with persisted sessions
-- `Admin` and `Member` authorization enforced by Postgres Row Level Security
-- Project CRUD, project teams, start dates, due dates, and progress tracking
-- Task CRUD, assignments, priorities, due dates, status tracking, search, and filtering
-- Dashboard metrics, overdue detection, team directory, and recent activity
-- Supabase Realtime refresh for projects, project assignments, and tasks
-- Responsive layouts for desktop and mobile usage
+- Email/password authentication with persisted Supabase sessions
+- Admin and member roles enforced by PostgreSQL RLS
+- First authenticated user bootstrap to admin when no admin exists
+- Project creation, editing, deletion, membership management, dates, and progress
+- Task assignment, priority, deadlines, search, and filtering
+- Member task workflow: **To Do → In Progress → Ready For Review**
+- Admin review workflow, including completion or return to in-progress
+- Required work summary when a member submits a task for review
+- Realtime refreshes for projects, memberships, and tasks
+- Workspace activity log, responsive app shell, and accessible dialogs
 
-## Local Setup
-
-1. Create a Supabase Cloud project.
-2. Run [`supabase/migrations/202606010001_initial_schema.sql`](supabase/migrations/202606010001_initial_schema.sql) in the Supabase SQL Editor.
-3. Run [`supabase/migrations/202606010002_validate_task_assignee.sql`](supabase/migrations/202606010002_validate_task_assignee.sql) in the Supabase SQL Editor.
-4. Run [`supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql`](supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql) in the Supabase SQL Editor.
-5. Copy `.env.example` to `.env.local` and add the Supabase project URL and anon key.
-6. Start the frontend:
-
-```bash
-npm install
-npm run dev
-```
-
-The first authenticated account is promoted to `admin` automatically when no admin exists. Later signups remain `member` accounts.
-
-## Environment Variables
-
-This repository is a Vite frontend, so browser-visible variables must use the `VITE_` prefix:
+## Architecture
 
 ```text
-VITE_SUPABASE_URL
-VITE_SUPABASE_ANON_KEY
+frontend/                 React + TypeScript + Vite browser application
+  src/app/                router and application providers
+  src/components/         reusable layout and UI primitives
+  src/features/           authentication and workspace pages
+  src/lib/supabase/       Supabase client and database mapping
+  src/services/           auth and workspace data operations
+  src/styles/             build-owned global styling
+backend/supabase/
+  migrations/             immutable PostgreSQL/RLS migration history
+docs/                     project documentation (reserved for future guides)
 ```
 
-`SUPABASE_SERVICE_ROLE_KEY` is reserved for a trusted backend or Vercel serverless function. Never expose it through a `VITE_` variable or commit it to Git.
+## Tech stack
 
-If this frontend is later migrated to Next.js, the public equivalents should be renamed to `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+- Frontend: React 19, TypeScript, Vite, React Router, Lucide icons
+- Backend: Supabase Auth, PostgreSQL, Row Level Security, Realtime
 
-## Security Model
+There is deliberately no Express or Node API layer. Supabase and PostgreSQL are the application's backend and authorization authority.
 
-The migrations enable RLS on every table. Database policies enforce the following:
+## Local development
 
-- Authenticated users can read team profiles.
-- Members can only read projects, memberships, tasks, and activity they are authorized to access.
-- Admins create, update, and delete projects and manage project membership.
-- Authorized project members create and update tasks.
-- Task assignees must belong to the related project.
-- Members with assigned tasks cannot be removed from a project until their tasks are reassigned.
-- Only admins delete tasks.
-- New signups receive the `member` role. The first authenticated user is promoted once when no admin exists; later role changes require an admin or trusted backend operation.
-- Database constraints validate statuses, priorities, required dates, and title lengths.
+1. Create a Supabase project.
+2. Run the migrations in this exact order from the Supabase SQL Editor:
 
-## Vercel Deployment
+   1. [`202606010001_initial_schema.sql`](backend/supabase/migrations/202606010001_initial_schema.sql)
+   2. [`202606010002_validate_task_assignee.sql`](backend/supabase/migrations/202606010002_validate_task_assignee.sql)
+   3. [`202606010003_bootstrap_admin_and_membership_guard.sql`](backend/supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql)
+   4. [`202606020001_task_review_workflow.sql`](backend/supabase/migrations/202606020001_task_review_workflow.sql)
 
-1. Import `https://github.com/utkarshverma-ai/ZenTask_Manager` into Vercel or run `vercel`.
-2. Configure `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the Vercel project.
-3. Deploy with `vercel --prod`.
-4. Add the deployed Vercel URL to the Supabase Authentication URL Configuration.
+3. Configure the frontend:
 
-## Known Limitations
+   ```bash
+   cd frontend
+   cp .env.example .env.local
+   ```
 
-- Secure invitation emails and admin-created Auth accounts require a trusted serverless function using `SUPABASE_SERVICE_ROLE_KEY`. The current UI promotes or demotes users who have already signed up.
-- The schema supports activity history, but does not yet provide audit export or retention controls.
-- Automated browser tests and RLS integration tests still need a configured Supabase test project.
+4. Set the public browser configuration in `frontend/.env.local`:
 
-## Next Iteration
+   ```text
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY=your-anon-key
+   ```
 
-1. Add a Vercel serverless invitation endpoint with service-role access.
-2. Add password reset, email verification messaging, and invitation acceptance.
-3. Add Playwright workflow coverage and SQL-based RLS regression tests.
-4. Add pagination, notifications, file attachments, and audit export.
+5. Install and run:
+
+   ```bash
+   npm install
+   npm run dev
+   ```
+
+## Scripts
+
+Run from `frontend/`:
+
+```bash
+npm run dev        # start Vite locally
+npm run typecheck  # TypeScript validation
+npm run build      # typecheck and production build
+npm run preview    # preview the production build
+```
+
+## Authorization model
+
+RLS is enabled on `profiles`, `projects`, `project_members`, `tasks`, and `activity_logs`.
+
+- Any authenticated user can view registered profiles.
+- Members only read projects, memberships, tasks, and activity associated with projects they can access.
+- Admins create, edit, and delete projects; manage project memberships; and create, edit, and delete tasks.
+- A task assignee must be a member of its project.
+- Removing a member with assigned tasks is rejected until those tasks are reassigned.
+- Members can update only their own assigned task's status and work summary. The database trigger rejects all other field changes and invalid transitions.
+- Admins retain broader task-management authority; client-side visibility is convenience only, never a security boundary.
+
+The initial migration defines the basic schema and policies. The fourth migration replaces the former permissive task update policy with the review workflow policies and trigger, so it must not be skipped.
+
+## Task review workflow
+
+For an assigned member:
+
+```text
+To Do → In Progress → Ready For Review
+```
+
+Submitting for review requires a non-empty work summary. Admins can review a submitted task and complete it or send it back to in-progress. The `enforce_task_workflow` trigger is the final authority for this behavior.
+
+## Deployment to Vercel
+
+1. Import this repository in Vercel.
+2. Set the Vercel Root Directory to `frontend`.
+3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel's environment variables.
+4. Deploy with the default build command, `npm run build`.
+5. Add the deployed URL to Supabase Auth URL Configuration.
+
+[`frontend/vercel.json`](frontend/vercel.json) provides the SPA rewrite so BrowserRouter routes work after a direct refresh. The root [`vercel.json`](vercel.json) supports deployments that retain the repository root as Vercel's project root.
+
+## Security and environment variables
+
+Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` belong in browser configuration. They are designed to be public and are protected by RLS.
+
+`SUPABASE_SERVICE_ROLE_KEY` is server-only. It must never be placed in a `VITE_` variable, committed to this repository, or used in browser code. If invitations or administrative user provisioning are added later, implement them in a trusted serverless/edge function.
+
+## Known limitations
+
+- Users must sign up before an administrator can change their role. The current product does not send invitations.
+- There is no password-reset view, task attachment system, notification center, or audit export yet.
+- End-to-end tests and Supabase RLS integration tests need a dedicated test project and are not included in this repository.
+
+## Suggested next steps
+
+1. Add a trusted Supabase Edge Function or Vercel serverless invitation flow.
+2. Add Playwright coverage for the sign-in, member handoff, and admin review flows.
+3. Add SQL RLS regression tests against a disposable Supabase project.
+4. Add pagination and notifications as workspace volume grows.
