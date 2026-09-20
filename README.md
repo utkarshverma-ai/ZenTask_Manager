@@ -1,99 +1,53 @@
-# ZenTask Manager
+<p align="center">
+  <img src="frontend/public/brand/zentask-icon.png" alt="ZenTask logo" width="104" />
+</p>
 
-ZenTask Manager is a focused project-delivery workspace for teams that need clear ownership, deadlines, and task review. The browser client is built with React, TypeScript, and Vite; Supabase (PostgreSQL, Auth, Realtime, and Row Level Security) is the backend.
+<h1 align="center">ZenTask</h1>
+
+<p align="center">
+  A role-aware project and task management workspace built with React, TypeScript, Vite, and Supabase.
+</p>
+
+<p align="center">
+  <a href="https://zen-task-manager.vercel.app"><strong>Live Demo</strong></a>
+  ·
+  <a href="#features">Features</a>
+  ·
+  <a href="#architecture">Architecture</a>
+  ·
+  <a href="#local-development">Run Locally</a>
+</p>
+
+---
+
+## Overview
+
+ZenTask is a focused project-delivery workspace designed around clear ownership, controlled task handoffs, and role-aware collaboration.
+
+Instead of treating task management as simple CRUD, ZenTask models a real delivery workflow:
+
+- administrators manage projects, memberships, tasks, and review decisions;
+- members work only on tasks assigned to them;
+- submissions move through an explicit review stage;
+- PostgreSQL Row Level Security and database triggers enforce the rules independently of the UI.
+
+The frontend uses **React 19 + TypeScript + Vite**, while **Supabase Auth, PostgreSQL, Realtime, and RLS** provide the backend and authorization layer.
 
 ## Features
 
-- Email/password authentication with persisted Supabase sessions
-- Admin and member roles enforced by PostgreSQL RLS
-- First authenticated user bootstrap to admin when no admin exists
-- Project creation, editing, deletion, membership management, dates, and progress
-- Task assignment, priority, deadlines, search, and filtering
-- Member task workflow: **To Do → In Progress → Ready For Review**
-- Admin review workflow, including completion or return to in-progress
-- Required work summary when a member submits a task for review
-- Realtime refreshes for projects, memberships, and tasks
-- Workspace activity log, responsive app shell, and accessible dialogs
-- Password reset flow and task detail history using existing activity logs
+| Area | What ZenTask supports |
+| --- | --- |
+| Authentication | Email/password sign-up and sign-in, persisted sessions, password recovery |
+| Roles | Admin and Member experiences with database-enforced authorization |
+| Projects | Create, edit, delete, assign members, dates, status, and progress |
+| Tasks | Assignment, priority, deadlines, search, filters, sorting, task details |
+| Review workflow | Member submission with required work summary, admin completion or return |
+| Activity | Workspace activity feed and task-specific activity history |
+| Realtime | Automatic refresh for projects, memberships, and tasks |
+| UX | Responsive app shell, accessible dialogs, toasts, empty/loading/error states |
+| Design | Graphite, emerald, amber, and warm-ivory visual system with custom ZenTask branding |
 
-## Architecture
-
-```text
-frontend/                 React + TypeScript + Vite browser application
-  src/app/                router and application providers
-  src/components/         reusable layout and UI primitives
-  src/features/           authentication and workspace pages
-  src/lib/supabase/       Supabase client and database mapping
-  src/services/           auth and workspace data operations
-  src/styles/             build-owned global styling
-backend/supabase/
-  migrations/             immutable PostgreSQL/RLS migration history
-```
-
-## Tech stack
-
-- Frontend: React 19, TypeScript, Vite, React Router, Lucide icons
-- Backend: Supabase Auth, PostgreSQL, Row Level Security, Realtime
-
-There is deliberately no Express or Node API layer. Supabase and PostgreSQL are the application's backend and authorization authority.
-
-## Local development
-
-1. Create a Supabase project.
-2. Run the migrations in this exact order from the Supabase SQL Editor:
-
-   1. [`202606010001_initial_schema.sql`](backend/supabase/migrations/202606010001_initial_schema.sql)
-   2. [`202606010002_validate_task_assignee.sql`](backend/supabase/migrations/202606010002_validate_task_assignee.sql)
-   3. [`202606010003_bootstrap_admin_and_membership_guard.sql`](backend/supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql)
-   4. [`202606020001_task_review_workflow.sql`](backend/supabase/migrations/202606020001_task_review_workflow.sql)
-
-3. Configure the frontend:
-
-   ```bash
-   cd frontend
-   cp .env.example .env.local
-   ```
-
-4. Set the public browser configuration in `frontend/.env.local`:
-
-   ```text
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_ANON_KEY=your-anon-key
-   ```
-
-5. Install and run:
-
-   ```bash
-   npm install
-   npm run dev
-   ```
-
-## Scripts
-
-Run from `frontend/`:
-
-```bash
-npm run dev        # start Vite locally
-npm run typecheck  # TypeScript validation
-npm run build      # typecheck and production build
-npm run preview    # preview the production build
-```
-
-## Authorization model
-
-RLS is enabled on `profiles`, `projects`, `project_members`, `tasks`, and `activity_logs`.
-
-- Any authenticated user can view registered profiles.
-- Members only read projects, memberships, tasks, and activity associated with projects they can access.
-- Admins create, edit, and delete projects; manage project memberships; and create, edit, and delete tasks.
-- A task assignee must be a member of its project.
-- Removing a member with assigned tasks is rejected until those tasks are reassigned.
-- Members can update only their own assigned task's status and work summary. The database trigger rejects all other field changes and invalid transitions.
-- Admins retain broader task-management authority; client-side visibility is convenience only, never a security boundary.
-
-The initial migration defines the basic schema and policies. The fourth migration replaces the former permissive task update policy with the review workflow policies and trigger, so it must not be skipped.
-
-## Task review workflow
+## Task workflow
 
 For an assigned member:
 
@@ -101,35 +55,279 @@ For an assigned member:
 To Do → In Progress → Ready For Review
 ```
 
-Submitting for review requires a non-empty work summary. Admins can review a submitted task and complete it or send it back to in-progress. The `enforce_task_workflow` trigger is the final authority for this behavior.
+Submitting a task for review requires a non-empty work summary.
 
-## Deployment to Vercel
+An administrator can then:
 
-1. Import this repository in Vercel.
-2. Set the Vercel Root Directory to `frontend`.
-3. Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in Vercel's environment variables.
-4. Deploy with the default build command, `npm run build`.
-5. Add the deployed URL to Supabase Auth URL Configuration.
+```text
+Ready For Review → Completed
+                 ↘ In Progress
+```
 
-For password recovery, set the production Site URL in Supabase Auth and add `https://your-domain/reset-password` (and the local equivalent) to the Redirect URLs allow list. ZenTask sends reset links back to this route.
+The UI guides the workflow, but the database trigger `enforce_task_workflow` is the final authority.
 
-Use `frontend` as the Vercel Root Directory. [`frontend/vercel.json`](frontend/vercel.json) provides the SPA rewrite so BrowserRouter routes work after a direct refresh.
+## Roles and permissions
 
-## Security and environment variables
+### Admin
 
-Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` belong in browser configuration. They are designed to be public and are protected by RLS.
+Admins can:
 
-`SUPABASE_SERVICE_ROLE_KEY` is server-only. It must never be placed in a `VITE_` variable, committed to this repository, or used in browser code. If invitations or administrative user provisioning are added later, implement them in a trusted serverless/edge function.
+- create, edit, and delete projects;
+- manage project membership;
+- create, assign, edit, and delete tasks;
+- review submitted work;
+- complete a task or return it to **In Progress**;
+- update registered users' workspace roles.
 
-## Known limitations
+### Member
 
-- Users must sign up before an administrator can change their role. The current product does not send invitations.
-- There is no task attachment system, notification center, or audit export yet.
-- End-to-end tests and Supabase RLS integration tests need a dedicated test project and are not included in this repository.
+Members can:
 
-## Suggested next steps
+- view projects they are allowed to access;
+- view project tasks and activity permitted by RLS;
+- update only their own assigned task's status and work summary;
+- move tasks through **To Do → In Progress → Ready For Review**.
 
-1. Add a trusted Supabase Edge Function or Vercel serverless invitation flow.
-2. Add Playwright coverage for the sign-in, member handoff, and admin review flows.
-3. Add SQL RLS regression tests against a disposable Supabase project.
-4. Add pagination and notifications as workspace volume grows.
+Members cannot edit protected task fields such as title, project, assignee, priority, or due date.
+
+## Architecture
+
+```text
+ZenTask_Manager/
+├── frontend/
+│   ├── public/
+│   │   └── brand/               ZenTask logo and app icon
+│   ├── src/
+│   │   ├── app/                 router and application providers
+│   │   ├── components/          shared layout and UI primitives
+│   │   ├── features/
+│   │   │   ├── auth/
+│   │   │   ├── dashboard/
+│   │   │   ├── projects/
+│   │   │   ├── tasks/
+│   │   │   └── team/
+│   │   ├── hooks/               shared React hooks
+│   │   ├── lib/supabase/        Supabase client and database mapping
+│   │   ├── services/            data-access and auth services
+│   │   ├── styles/              global design system and responsive UI
+│   │   ├── types/               domain models
+│   │   └── utils/               workspace helpers
+│   ├── package.json
+│   ├── vercel.json
+│   └── vite.config.ts
+│
+└── backend/
+    └── supabase/
+        └── migrations/           PostgreSQL schema, RLS, triggers, workflow rules
+```
+
+There is intentionally **no Express/Node API layer**. Supabase and PostgreSQL are the backend and authorization authority.
+
+## Tech stack
+
+### Frontend
+
+- React 19
+- TypeScript
+- Vite
+- React Router
+- Lucide React
+- CSS design system
+
+### Backend
+
+- Supabase Auth
+- PostgreSQL
+- Row Level Security
+- Supabase Realtime
+- PostgreSQL triggers
+
+### Deployment
+
+- Vercel
+
+## Security and authorization
+
+ZenTask does not rely on hidden buttons or client-side role checks as its security boundary.
+
+RLS is enabled on:
+
+- `profiles`
+- `projects`
+- `project_members`
+- `tasks`
+- `activity_logs`
+
+Important rules include:
+
+- members only read projects and related data they are allowed to access;
+- a task assignee must belong to that task's project;
+- removing a project member with assigned tasks is blocked until those tasks are reassigned;
+- assigned members can update only status and work summary;
+- invalid member status transitions are rejected in PostgreSQL;
+- a work summary is required before a member can submit for review;
+- administrators retain broader task-management authority.
+
+Client-side visibility improves usability. **RLS and database triggers enforce the actual permissions.**
+
+## Authentication and recovery
+
+ZenTask uses Supabase Auth for session management.
+
+Supported flows:
+
+- account creation;
+- sign in;
+- persisted authentication;
+- sign out;
+- forgot-password request;
+- recovery-link validation;
+- password update and recovery-session sign-out.
+
+For hosted password recovery, the application's `/reset-password` route must be included in the Supabase Auth redirect allow list.
+
+## Local development
+
+### 1. Create a Supabase project
+
+Create a new Supabase project and open the SQL Editor.
+
+### 2. Apply migrations
+
+Run these migrations in order:
+
+1. [`202606010001_initial_schema.sql`](backend/supabase/migrations/202606010001_initial_schema.sql)
+2. [`202606010002_validate_task_assignee.sql`](backend/supabase/migrations/202606010002_validate_task_assignee.sql)
+3. [`202606010003_bootstrap_admin_and_membership_guard.sql`](backend/supabase/migrations/202606010003_bootstrap_admin_and_membership_guard.sql)
+4. [`202606020001_task_review_workflow.sql`](backend/supabase/migrations/202606020001_task_review_workflow.sql)
+
+Do not skip the fourth migration; it contains the review-workflow policies and enforcement trigger.
+
+### 3. Configure the frontend
+
+```bash
+cd frontend
+cp .env.example .env.local
+```
+
+Set:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+Only browser-safe Supabase values belong here.
+
+Never expose `SUPABASE_SERVICE_ROLE_KEY` through a `VITE_` variable or frontend code.
+
+### 4. Install and run
+
+```bash
+npm install
+npm run dev
+```
+
+The Vite development server will print the local URL.
+
+## Available scripts
+
+Run from `frontend/`:
+
+```bash
+npm run dev          # start the Vite development server
+npm run format       # format frontend files and README
+npm run format:check # verify Prettier formatting
+npm run typecheck    # run TypeScript validation
+npm run build        # typecheck + production Vite build
+npm run preview      # preview the production build
+```
+
+## Deployment
+
+The live application is deployed with Vercel:
+
+**https://zen-task-manager.vercel.app**
+
+Vercel project configuration:
+
+```text
+Framework Preset: Vite
+Root Directory: frontend
+Build Command: npm run build
+Output Directory: dist
+```
+
+Required environment variables:
+
+```text
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+```
+
+[`frontend/vercel.json`](frontend/vercel.json) provides the SPA rewrite needed for direct BrowserRouter route refreshes.
+
+For password recovery, configure the production Site URL and add:
+
+```text
+https://your-domain/reset-password
+```
+
+to the Supabase Auth redirect allow list.
+
+## Main routes
+
+```text
+/login
+/reset-password
+/dashboard
+/projects
+/projects/:projectId
+/tasks
+/team
+```
+
+## Product design
+
+ZenTask uses a restrained visual system rather than a component-library theme:
+
+- **Graphite** for the application frame and navigation;
+- **Emerald** for primary actions and active states;
+- **Amber** for review and warning states;
+- **Warm Ivory** for the main application canvas;
+- semantic success and danger colors for completion and destructive states.
+
+The interface includes responsive navigation, keyboard-visible focus states, accessible dialogs with focus trapping/restoration, reusable toast feedback, and mobile layouts.
+
+## Current limitations
+
+ZenTask currently does not include:
+
+- invitation emails or administrative user provisioning;
+- task attachments;
+- a dedicated notification center;
+- audit export;
+- automated browser E2E coverage;
+- automated Supabase RLS integration tests.
+
+Users currently create an account before an administrator can update their workspace role.
+
+## Roadmap
+
+Potential next steps:
+
+- trusted invitation flow using a Supabase Edge Function or Vercel serverless function;
+- Playwright coverage for auth, member handoff, and admin review flows;
+- SQL/RLS regression testing against a disposable Supabase project;
+- notifications and pagination for larger workspaces;
+- file attachments and richer audit reporting.
+
+## Author
+
+**Utkarsh Verma**
+
+ZenTask was designed and built as a full-stack project-management workspace focused on practical authorization, workflow enforcement, and a polished product experience.
+
+<p align="center">
+  <strong>© 2026 ZenTask · Built by Utkarsh Verma</strong>
+</p>
