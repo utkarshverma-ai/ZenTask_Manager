@@ -42,7 +42,7 @@ export function AuthPage() {
     <div className="auth-page">
       <section className="auth-aside">
         <div className="brand">
-          <span>ZT</span>
+          <img className="brand-icon" src="/brand/zentask-icon.png" alt="" aria-hidden="true" />
           <strong>ZenTask</strong>
         </div>
         <div>

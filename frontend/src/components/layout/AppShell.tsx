@@ -21,7 +21,7 @@ export function AppShell() {
       </a>
       <aside className={`sidebar ${open ? 'open' : ''}`}>
         <div className="brand">
-          <span>ZT</span>
+          <img className="brand-icon" src="/brand/zentask-icon.png" alt="" aria-hidden="true" />
           <strong>ZenTask</strong>
           <button className="icon-button mobile-only" onClick={() => setOpen(false)} aria-label="Close navigation">
             <X />
